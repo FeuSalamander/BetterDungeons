@@ -5,3 +5,6 @@ api-version: 1.13
 prefix: BD
 authors: [FeuSalamnder]
 description: With Better Dungeons you can create your own hypixel skyblock like dungeons
+commands:
+  bd:
+    description: the main command of the plugin

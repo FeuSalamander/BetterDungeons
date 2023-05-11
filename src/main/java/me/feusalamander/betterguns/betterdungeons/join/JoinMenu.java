@@ -8,7 +8,6 @@ public class JoinMenu {
     private final Inventory inv;
     public JoinMenu(Config config){
         inv = Bukkit.createInventory(null, 27, config.getJoinGuiName());
-
     }
     public Inventory getGui(){
         return inv;

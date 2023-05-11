@@ -1,0 +1,7 @@
+1:
+  type: catacombs
+  name: Entrance
+  size: 5
+  rooms: [1, 2, 3]
+  mobs level:
+    1: 10
