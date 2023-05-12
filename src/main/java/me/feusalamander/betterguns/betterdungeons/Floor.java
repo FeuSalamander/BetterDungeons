@@ -1,35 +1,48 @@
 package me.feusalamander.betterguns.betterdungeons;
 
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+
+import java.util.List;
+@SuppressWarnings("deprecation")
 public class Floor {
     private String name;
-    private int id;
+    private String id;
     private boolean activated;
+    private String type;
+    private int size;
+    private List<Integer> rooms;
+    private BetterDungeons main = BetterDungeons.main;
 
-    public Floor(final int id){
+    public Floor(final String id){
         this.id = id;
+        final ConfigurationSection section = main.floorsConf.getConfig().getConfigurationSection(id);
+        name = section.getString("name");
+        activated = section.getBoolean("activated");
+        type = section.getString("type");
+        size = section.getInt("size");
+        rooms = section.getIntegerList("rooms");
+        issues();
     }
-
-    public String getName() {
-        return name;
+    private void issues(){
+        if(name.isEmpty()){
+            Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have a valid name");
+            unload();
+        }
+        if(type.isEmpty()){
+            Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have a valid type");
+            unload();
+        }
+        if(size == 0){
+            Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have a valid size >=2");
+            unload();
+        }
+        if(rooms.isEmpty()){
+            Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have valid rooms");
+            unload();
+        }
     }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public boolean isActivated() {
-        return activated;
-    }
-
-    public void setActivated(boolean activated) {
-        this.activated = activated;
+    private void unload(){
+        main.getLoadedfloors().remove(this);
     }
 }
