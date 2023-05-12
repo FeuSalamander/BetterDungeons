@@ -1,6 +1,6 @@
 name: BetterDungeons
 version: '${project.version}'
-main: me.feusalamander.betterguns.betterdungeons.BetterDungeons
+main: me.feusalamander.betterdungeons.BetterDungeons
 api-version: 1.13
 prefix: BD
 authors: [FeuSalamnder]

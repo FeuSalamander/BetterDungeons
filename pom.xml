@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>me.feusalamander.betterguns</groupId>
+    <groupId>me.feusalamander.betterdungeons</groupId>
     <artifactId>BetterDungeons</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
-    <name>Better Dungeons</name>
+    <name>BetterDungeons</name>
 
     <description>With Better Dungeons you can create your own hypixel skyblock like dungeons</description>
     <properties>

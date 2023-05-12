@@ -1,11 +1,11 @@
-package me.feusalamander.betterguns.betterdungeons.Configs;
+package me.feusalamander.betterdungeons.Configs;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.util.Set;
 
-import static me.feusalamander.betterguns.betterdungeons.BetterDungeons.main;
+import static me.feusalamander.betterdungeons.BetterDungeons.main;
 
 public class FloorsConf {
     private final File f;

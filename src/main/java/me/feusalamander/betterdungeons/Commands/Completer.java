@@ -1,4 +1,4 @@
-package me.feusalamander.betterguns.betterdungeons.Commands;
+package me.feusalamander.betterdungeons.Commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;

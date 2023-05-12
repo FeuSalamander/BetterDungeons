@@ -1,4 +1,4 @@
-package me.feusalamander.betterguns.betterdungeons;
+package me.feusalamander.betterdungeons;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -32,6 +32,10 @@ public class Floor {
         if(type.isEmpty()){
             Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have a valid type");
             unload();
+        }else {
+            if(!main.getTypes().contains(type)){
+                main.getTypes().add(type);
+            }
         }
         if(size == 0){
             Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have a valid size >=2");

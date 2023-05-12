@@ -1,4 +1,4 @@
-package me.feusalamander.betterguns.betterdungeons.Configs;
+package me.feusalamander.betterdungeons.Configs;
 
 import org.bukkit.configuration.file.FileConfiguration;
 

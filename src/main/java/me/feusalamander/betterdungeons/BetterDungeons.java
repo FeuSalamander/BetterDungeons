@@ -1,10 +1,11 @@
-package me.feusalamander.betterguns.betterdungeons;
+package me.feusalamander.betterdungeons;
 
-import me.feusalamander.betterguns.betterdungeons.Commands.CmdExecutor;
-import me.feusalamander.betterguns.betterdungeons.Commands.Completer;
-import me.feusalamander.betterguns.betterdungeons.Configs.Config;
-import me.feusalamander.betterguns.betterdungeons.Configs.FloorsConf;
-import me.feusalamander.betterguns.betterdungeons.join.JoinMenu;
+import me.feusalamander.betterdungeons.Commands.CmdExecutor;
+import me.feusalamander.betterdungeons.Commands.Completer;
+import me.feusalamander.betterdungeons.Configs.FloorsConf;
+import me.feusalamander.betterdungeons.join.GuiListener;
+import me.feusalamander.betterdungeons.join.JoinMenu;
+import me.feusalamander.betterdungeons.Configs.Config;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,6 +19,7 @@ public final class BetterDungeons extends JavaPlugin {
     public static BetterDungeons main;
     public FloorsConf floorsConf;
     private final List<Floor> loadedfloors = new ArrayList<>();
+    private final List<String> types = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -26,10 +28,11 @@ public final class BetterDungeons extends JavaPlugin {
         saveDefaultConfig();
         floorsConf = new FloorsConf();
         config = new Config(getConfig());
-        gui = new JoinMenu(config);
         loadFloors();
+        gui = new JoinMenu(config);
         Objects.requireNonNull(getCommand("BD")).setTabCompleter(new Completer());
         Objects.requireNonNull(getCommand("BD")).setExecutor(new CmdExecutor());
+        getServer().getPluginManager().registerEvents(new GuiListener(), this);
     }
 
     @Override
@@ -47,5 +50,8 @@ public final class BetterDungeons extends JavaPlugin {
     }
     public List<Floor> getLoadedfloors(){
         return loadedfloors;
+    }
+    public List<String> getTypes(){
+        return types;
     }
 }
