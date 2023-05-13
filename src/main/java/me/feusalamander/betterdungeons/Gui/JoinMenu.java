@@ -3,6 +3,7 @@ package me.feusalamander.betterdungeons.Gui;
 import me.feusalamander.betterdungeons.BetterDungeons;
 import me.feusalamander.betterdungeons.Configs.Config;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 
@@ -16,9 +17,6 @@ public class JoinMenu {
         inv = Bukkit.createInventory(null, 54, config.getJoinGuiName());
         t.addPanes(inv);
         createGui();
-    }
-    public Inventory getGui(){
-        return inv;
     }
     private void createGui(){
         t.addItem(inv, 49, Material.BARRIER, "§c§lExit");
@@ -57,5 +55,7 @@ public class JoinMenu {
             }
         }
     }
-
+    public Inventory getGui(){
+        return inv;
+    }
 }

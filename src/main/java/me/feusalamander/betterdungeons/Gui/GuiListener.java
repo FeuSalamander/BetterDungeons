@@ -1,6 +1,7 @@
 package me.feusalamander.betterdungeons.Gui;
 
 import me.feusalamander.betterdungeons.BetterDungeons;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 @SuppressWarnings("deprecation")
 public class GuiListener implements Listener {
+    private BetterDungeons main = BetterDungeons.main;
     @EventHandler
     private void onClick(InventoryClickEvent e){
         Player p = (Player) e.getWhoClicked();
@@ -18,11 +20,35 @@ public class GuiListener implements Listener {
             return;
         }
         String name = item.getItemMeta().getDisplayName();
-        if(title.equalsIgnoreCase(BetterDungeons.main.config.getJoinGuiName())){
+        if(title.equalsIgnoreCase(main.config.getJoinGuiName())){
             e.setCancelled(true);
-            if(name.equalsIgnoreCase("§c§lExit")){
-                p.closeInventory();
+            mainGui(name, p);
+            return;
+        }
+        for(String s : main.getTypes()){
+            if(s.contains(title)){
+                e.setCancelled(true);
+                onCLickFloor(name, p);
+                return;
             }
         }
+    }
+    private void mainGui(String name, Player p){
+        if(name.equalsIgnoreCase("§c§lExit")){
+            p.closeInventory();
+            return;
+        }
+        for(String type : main.getTypes()){
+            String[] split = type.split(":");
+            String name1 = split[0];
+            if(name1.equalsIgnoreCase(name)){
+                TypeMenu menu = main.getTypeMenus().get(main.getTypes().indexOf(type));
+                p.openInventory(menu.getInv());
+                break;
+            }
+        }
+    }
+    private void onCLickFloor(String name, Player p){
+
     }
 }

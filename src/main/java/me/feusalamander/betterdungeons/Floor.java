@@ -1,6 +1,7 @@
 package me.feusalamander.betterdungeons;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.List;
@@ -26,11 +27,11 @@ public class Floor {
     }
     private void issues(){
         if(name.isEmpty()){
-            Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have a valid name");
+            main.getLogger().info("§4[BD] The Floor with the id:"+id+" needs to have a valid name");
             unload();
         }
-        if(type.isEmpty()){
-            Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have a valid type");
+        if(!type.contains(":")){
+            main.getLogger().info("§4[BD] The Floor with the id:"+id+" needs to have a valid type");
             unload();
         }else {
             if(!main.getTypes().contains(type)){
@@ -38,11 +39,11 @@ public class Floor {
             }
         }
         if(size == 0){
-            Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have a valid size >=2");
+            main.getLogger().info("§4[BD] The Floor with the id:"+id+" needs to have a valid size >=2");
             unload();
         }
         if(rooms.isEmpty()){
-            Bukkit.broadcastMessage("§4[BD] The Floor is the id:"+id+" needs to have valid rooms");
+            main.getLogger().info("§4[BD] The Floor with the id:"+id+" needs to have valid rooms");
             unload();
         }
     }
