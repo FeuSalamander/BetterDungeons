@@ -32,10 +32,10 @@ public final class BetterDungeons extends JavaPlugin {
         floorsConf = new FloorsConf();
         config = new Config(getConfig());
         loadFloors();
-        loadGuis();
         Objects.requireNonNull(getCommand("BD")).setTabCompleter(new Completer());
         Objects.requireNonNull(getCommand("BD")).setExecutor(new CmdExecutor());
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
+        loadGuis();
     }
 
     @Override
@@ -65,7 +65,6 @@ public final class BetterDungeons extends JavaPlugin {
     public List<String> getTypes(){
         return types;
     }
-
     public List<TypeMenu> getTypeMenus() {
         return typeMenus;
     }

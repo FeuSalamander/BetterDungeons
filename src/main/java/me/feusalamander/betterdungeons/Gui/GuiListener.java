@@ -49,6 +49,9 @@ public class GuiListener implements Listener {
         }
     }
     private void onCLickFloor(String name, Player p){
-
+        if(name.equalsIgnoreCase("§aReturn")){
+            p.openInventory(main.gui.getGui());
+            return;
+        }
     }
 }

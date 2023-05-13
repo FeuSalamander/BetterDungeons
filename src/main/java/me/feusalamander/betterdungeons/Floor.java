@@ -1,19 +1,21 @@
 package me.feusalamander.betterdungeons;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.List;
 @SuppressWarnings("deprecation")
 public class Floor {
-    private String name;
-    private String id;
-    private boolean activated;
-    private String type;
-    private int size;
-    private List<Integer> rooms;
-    private BetterDungeons main = BetterDungeons.main;
+    private final String name;
+    private final String id;
+    private final boolean activated;
+    private final String type;
+    private final int size;
+    private final List<Integer> rooms;
+    private final String itemSkin;
+    private final String itemTitle;
+    private final List<String> itemLore;
+    private final BetterDungeons main = BetterDungeons.main;
 
     public Floor(final String id){
         this.id = id;
@@ -23,10 +25,13 @@ public class Floor {
         type = section.getString("type");
         size = section.getInt("size");
         rooms = section.getIntegerList("rooms");
+        itemSkin = section.getString("item.skin");
+        itemTitle = section.getString("item.title");
+        itemLore = section.getStringList("item.lore");
         issues();
     }
     private void issues(){
-        if(name.isEmpty()){
+        if(name == null){
             main.getLogger().info("§4[BD] The Floor with the id:"+id+" needs to have a valid name");
             unload();
         }
@@ -42,12 +47,51 @@ public class Floor {
             main.getLogger().info("§4[BD] The Floor with the id:"+id+" needs to have a valid size >=2");
             unload();
         }
-        if(rooms.isEmpty()){
+        if(rooms == null){
             main.getLogger().info("§4[BD] The Floor with the id:"+id+" needs to have valid rooms");
             unload();
+        }
+        if(itemSkin == null){
+            Bukkit.getConsoleSender().sendMessage("§4[BD] The Floor with the id:"+id+" needs to have valid item skin");
         }
     }
     private void unload(){
         main.getLoadedfloors().remove(this);
+    }
+
+    public boolean isActivated() {
+        return activated;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public List<Integer> getRooms() {
+        return rooms;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getItemSkin() {
+        return itemSkin;
+    }
+
+    public List<String> getItemLore() {
+        return itemLore;
+    }
+
+    public String getItemTitle() {
+        return itemTitle;
     }
 }
