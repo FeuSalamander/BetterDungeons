@@ -23,6 +23,7 @@ public final class BetterDungeons extends JavaPlugin {
     private final List<Floor> loadedfloors = new ArrayList<>();
     private final List<String> types = new ArrayList<>();
     private final List<TypeMenu> typeMenus = new ArrayList<>();
+    private final List<ActiveDungeon> activeDungeons = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -67,5 +68,8 @@ public final class BetterDungeons extends JavaPlugin {
     }
     public List<TypeMenu> getTypeMenus() {
         return typeMenus;
+    }
+    public List<ActiveDungeon> getActivedungeons() {
+        return activeDungeons;
     }
 }

@@ -1,12 +1,15 @@
 package me.feusalamander.betterdungeons.Gui;
 
+import me.feusalamander.betterdungeons.ActiveDungeon;
 import me.feusalamander.betterdungeons.BetterDungeons;
-import org.bukkit.Bukkit;
+import me.feusalamander.betterdungeons.Floor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 @SuppressWarnings("deprecation")
 public class GuiListener implements Listener {
@@ -52,6 +55,12 @@ public class GuiListener implements Listener {
         if(name.equalsIgnoreCase("§aReturn")){
             p.openInventory(main.gui.getGui());
             return;
+        }
+        for(Floor floor : main.getLoadedfloors()){
+            if(name.equalsIgnoreCase(floor.getItemTitle())||name.equalsIgnoreCase(floor.getName())){
+                ActiveDungeon activedungeon = new ActiveDungeon(List.of(p), floor);
+                main.getActivedungeons().add(activedungeon);
+            }
         }
     }
 }
