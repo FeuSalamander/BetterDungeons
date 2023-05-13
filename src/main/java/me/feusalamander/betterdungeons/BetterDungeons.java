@@ -8,6 +8,7 @@ import me.feusalamander.betterdungeons.Gui.JoinMenu;
 import me.feusalamander.betterdungeons.Configs.Config;
 import me.feusalamander.betterdungeons.Gui.Tools;
 import me.feusalamander.betterdungeons.Gui.TypeMenu;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -17,9 +18,10 @@ import java.util.Objects;
 
 public final class BetterDungeons extends JavaPlugin {
     public JoinMenu gui;
-    public Config config;
+    public  static Config config;
     public static BetterDungeons main;
     public FloorsConf floorsConf;
+    private World world;
     private final List<Floor> loadedfloors = new ArrayList<>();
     private final List<String> types = new ArrayList<>();
     private final List<TypeMenu> typeMenus = new ArrayList<>();
@@ -37,11 +39,14 @@ public final class BetterDungeons extends JavaPlugin {
         Objects.requireNonNull(getCommand("BD")).setExecutor(new CmdExecutor());
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
         loadGuis();
+        createWorld();
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        for(ActiveDungeon activeDungeon : getActivedungeons()){
+            activeDungeon.unload();
+        }
     }
     private void loadFloors(){
         for(String floorkey : floorsConf.getFloors()){
@@ -60,6 +65,23 @@ public final class BetterDungeons extends JavaPlugin {
             getTypeMenus().add(menu);
         }
     }
+    private void createWorld(){
+        WorldCreator creator = new WorldCreator("DungeonWorld");
+        creator.generator(new VoidWorld());
+        world = Bukkit.createWorld(creator);
+        assert world != null;
+        world.setPVP(false);
+        world.setAutoSave(false);
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        world.setGameRule(GameRule.NATURAL_REGENERATION, false);
+        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
+        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+        world.setGameRule(GameRule.DO_MOB_LOOT, false);
+        world.setGameRule(GameRule.FALL_DAMAGE, false);
+        world.setGameRule(GameRule.KEEP_INVENTORY, false);
+        world.setGameRule(GameRule.MOB_GRIEFING, false);
+        world.setGameRule(GameRule.UNIVERSAL_ANGER, false);
+    }
     public List<Floor> getLoadedfloors(){
         return loadedfloors;
     }
@@ -71,5 +93,8 @@ public final class BetterDungeons extends JavaPlugin {
     }
     public List<ActiveDungeon> getActivedungeons() {
         return activeDungeons;
+    }
+    public World getWorld(){
+        return world;
     }
 }

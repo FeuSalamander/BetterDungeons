@@ -58,8 +58,7 @@ public class GuiListener implements Listener {
         }
         for(Floor floor : main.getLoadedfloors()){
             if(name.equalsIgnoreCase(floor.getItemTitle())||name.equalsIgnoreCase(floor.getName())){
-                ActiveDungeon activedungeon = new ActiveDungeon(List.of(p), floor);
-                main.getActivedungeons().add(activedungeon);
+                new ActiveDungeon(List.of(p), floor);
             }
         }
     }
