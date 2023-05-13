@@ -3,9 +3,10 @@ package me.feusalamander.betterdungeons;
 import me.feusalamander.betterdungeons.Commands.CmdExecutor;
 import me.feusalamander.betterdungeons.Commands.Completer;
 import me.feusalamander.betterdungeons.Configs.FloorsConf;
-import me.feusalamander.betterdungeons.join.GuiListener;
-import me.feusalamander.betterdungeons.join.JoinMenu;
+import me.feusalamander.betterdungeons.Gui.GuiListener;
+import me.feusalamander.betterdungeons.Gui.JoinMenu;
 import me.feusalamander.betterdungeons.Configs.Config;
+import me.feusalamander.betterdungeons.Gui.Tools;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -29,7 +30,7 @@ public final class BetterDungeons extends JavaPlugin {
         floorsConf = new FloorsConf();
         config = new Config(getConfig());
         loadFloors();
-        gui = new JoinMenu(config);
+        gui = new JoinMenu(config, new Tools());
         Objects.requireNonNull(getCommand("BD")).setTabCompleter(new Completer());
         Objects.requireNonNull(getCommand("BD")).setExecutor(new CmdExecutor());
         getServer().getPluginManager().registerEvents(new GuiListener(), this);

@@ -1,4 +1,4 @@
-package me.feusalamander.betterdungeons.join;
+package me.feusalamander.betterdungeons.Gui;
 
 import me.feusalamander.betterdungeons.BetterDungeons;
 import org.bukkit.entity.Player;
