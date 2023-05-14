@@ -1,5 +1,9 @@
 package me.feusalamander.betterdungeons;
 
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitWorld;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import me.feusalamander.betterdungeons.Commands.CmdExecutor;
 import me.feusalamander.betterdungeons.Commands.Completer;
 import me.feusalamander.betterdungeons.Configs.FloorsConf;
@@ -27,7 +31,7 @@ public final class BetterDungeons extends JavaPlugin {
     private final List<TypeMenu> typeMenus = new ArrayList<>();
     private final List<ActiveDungeon> activeDungeons = new ArrayList<>();
     private final List<Double> usedLocations = new ArrayList<>();
-
+    @SuppressWarnings("deprecation")
     @Override
     public void onEnable() {
         getLogger().info("Better Dungeons by FeuSalamander is loading !");
@@ -41,6 +45,7 @@ public final class BetterDungeons extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
         loadGuis();
         createWorld();
+
     }
 
     @Override
