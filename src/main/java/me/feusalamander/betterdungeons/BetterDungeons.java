@@ -26,6 +26,7 @@ public final class BetterDungeons extends JavaPlugin {
     private final List<String> types = new ArrayList<>();
     private final List<TypeMenu> typeMenus = new ArrayList<>();
     private final List<ActiveDungeon> activeDungeons = new ArrayList<>();
+    private final List<Double> usedLocations = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -96,5 +97,8 @@ public final class BetterDungeons extends JavaPlugin {
     }
     public World getWorld(){
         return world;
+    }
+    public List<Double> getUsedLocations() {
+        return usedLocations;
     }
 }
