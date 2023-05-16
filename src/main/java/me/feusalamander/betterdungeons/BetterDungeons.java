@@ -39,13 +39,12 @@ public final class BetterDungeons extends JavaPlugin {
         saveDefaultConfig();
         floorsConf = new FloorsConf();
         config = new Config(getConfig());
+        createWorld();
         loadFloors();
         Objects.requireNonNull(getCommand("BD")).setTabCompleter(new Completer());
         Objects.requireNonNull(getCommand("BD")).setExecutor(new CmdExecutor());
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
         loadGuis();
-        createWorld();
-
     }
 
     @Override

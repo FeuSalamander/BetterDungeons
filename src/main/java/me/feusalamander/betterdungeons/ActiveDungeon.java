@@ -14,15 +14,19 @@ import com.sk89q.worldedit.session.ClipboardHolder;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
-import javax.print.PrintException;
 import java.io.*;
 import java.util.List;
+import java.util.Random;
+
 public class ActiveDungeon {
     BetterDungeons main = BetterDungeons.main;
     private final List<Player> players;
     private final Floor floor;
     private final World world = BetterDungeons.main.getWorld();
     private Location spawn;
+    private EditSession editSession;
+    private int editCount = 0;
+    private final Random rnd = new Random();
 
     public ActiveDungeon(List<Player> players, Floor floor){
         this.players = players;
@@ -37,7 +41,9 @@ public class ActiveDungeon {
         }
         main.getUsedLocations().add(loc);
         spawn = new Location(world, 0, 50, loc);
+        editSession = WorldEdit.getInstance().newEditSession(new BukkitWorld(world));
         createRooms();
+        editSession.close();
         for(Player p : players){
             p.teleport(spawn);
         }
@@ -49,25 +55,28 @@ public class ActiveDungeon {
             p.teleport(loc);
         }
         main.getUsedLocations().remove(spawn.getZ());
-        //destroy the map
+        for(int i = 1; i<= editCount; i++){
+            editSession.undo(editSession);
+        }
+
     }
     private void createRooms(){
-        useSchematic();
+        rnd.nextInt(floor.getSize()*floor.getSize());
+        useSchematic(spawn, "spawn.schem");
     }
-    private void useSchematic(){
-        File spawnSchematic = new File(main.getDataFolder(), "spawn.schem");
-        ClipboardFormat format = ClipboardFormats.findByFile(spawnSchematic);
+    private void useSchematic(Location loc, String path){
+        File schematic = new File(main.getDataFolder(), path);
+        ClipboardFormat format = ClipboardFormats.findByFile(schematic);
         assert format != null;
-        try (ClipboardReader reader = format.getReader(new FileInputStream(spawnSchematic))) {
+        try (ClipboardReader reader = format.getReader(new FileInputStream(schematic))) {
             Clipboard clipboard = reader.read();
-            try (EditSession editSession = WorldEdit.getInstance().getEditSessionFactory().getEditSession(new BukkitWorld(world), 999999999)) {
-                Operation operation = new ClipboardHolder(clipboard)
-                        .createPaste(editSession)
-                        .to(BlockVector3.at(spawn.getX(), spawn.getY(), spawn.getZ()))
-                        .ignoreAirBlocks(false)
-                        .build();
-                Operations.complete(operation);
-            }
+            Operation operation = new ClipboardHolder(clipboard)
+                    .createPaste(editSession)
+                    .to(BlockVector3.at(loc.getX(), loc.getY(), loc.getZ()))
+                    .ignoreAirBlocks(false)
+                    .build();
+            Operations.complete(operation);
+            editCount++;
         }catch (Exception e){
             e.printStackTrace();
         }
