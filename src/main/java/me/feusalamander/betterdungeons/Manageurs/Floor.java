@@ -1,5 +1,6 @@
-package me.feusalamander.betterdungeons;
+package me.feusalamander.betterdungeons.Manageurs;
 
+import me.feusalamander.betterdungeons.BetterDungeons;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -19,7 +20,7 @@ public class Floor {
 
     public Floor(final String id){
         this.id = id;
-        final ConfigurationSection section = main.floorsConf.getConfig().getConfigurationSection(id);
+        final ConfigurationSection section = main.getFloorsConf().getConfig().getConfigurationSection(id);
         name = section.getString("name");
         activated = section.getBoolean("activated");
         type = section.getString("type");

@@ -1,4 +1,4 @@
-package me.feusalamander.betterdungeons;
+package me.feusalamander.betterdungeons.Manageurs;
 
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
@@ -11,10 +11,13 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
+import me.feusalamander.betterdungeons.BetterDungeons;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -26,7 +29,9 @@ public class ActiveDungeon {
     private Location spawn;
     private EditSession editSession;
     private int editCount = 0;
-    private final Random rnd = new Random();
+    private Room start;
+    private Room end;
+    private final Random rand = new Random();
 
     public ActiveDungeon(List<Player> players, Floor floor){
         this.players = players;
@@ -47,7 +52,6 @@ public class ActiveDungeon {
         for(Player p : players){
             p.teleport(spawn);
         }
-
     }
     public void unload(){
         Location loc = BetterDungeons.config.getLobby();
@@ -60,9 +64,40 @@ public class ActiveDungeon {
         }
 
     }
+    private void roomQuery(){
+        List<Room> rooms = new ArrayList<>();
+        start = null;
+        end = null;
+        for(Integer id : floor.getRooms()){
+            for(Room room : main.getLoadedrooms()){
+                if(room.getId().equalsIgnoreCase(String.valueOf(id))&&room.isActivated()){
+                    if(room.getType().equalsIgnoreCase("start")){
+                        start = room;
+                    }else if(room.getType().equalsIgnoreCase("end")){
+                        end = room;
+                    }else {
+                        rooms.add(room);
+                    }
+                    break;
+                }
+            }
+        }
+        if(start == null){
+            unload();
+            for(Player p : this.players){
+                p.sendMessage("§4The dungeon needs to have a valid start/end room");
+            }
+            return;
+        }
+    }
     private void createRooms(){
-        rnd.nextInt(floor.getSize()*floor.getSize());
-        useSchematic(spawn, "spawn.schem");
+        roomQuery();
+        int size = floor.getSize();
+        Room[][] model = new Room[size][size];
+        boolean cl = rand.nextBoolean();
+        int rand1 = rand.nextInt(2);
+        if(cl){model[rand1*(size-1)][rand.nextInt(size)] = start;}else{model[rand.nextInt(size)][rand1*(size-1)] = start;}
+        useSchematic(spawn, start.getPath());
     }
     private void useSchematic(Location loc, String path){
         File schematic = new File(main.getDataFolder(), path);

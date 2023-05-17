@@ -1,17 +1,17 @@
 package me.feusalamander.betterdungeons;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import me.feusalamander.betterdungeons.Commands.CmdExecutor;
 import me.feusalamander.betterdungeons.Commands.Completer;
 import me.feusalamander.betterdungeons.Configs.FloorsConf;
+import me.feusalamander.betterdungeons.Configs.RoomsConf;
 import me.feusalamander.betterdungeons.Gui.GuiListener;
 import me.feusalamander.betterdungeons.Gui.JoinMenu;
 import me.feusalamander.betterdungeons.Configs.Config;
 import me.feusalamander.betterdungeons.Gui.Tools;
 import me.feusalamander.betterdungeons.Gui.TypeMenu;
+import me.feusalamander.betterdungeons.Manageurs.ActiveDungeon;
+import me.feusalamander.betterdungeons.Manageurs.Floor;
+import me.feusalamander.betterdungeons.Manageurs.Room;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,11 +22,13 @@ import java.util.Objects;
 
 public final class BetterDungeons extends JavaPlugin {
     public JoinMenu gui;
-    public  static Config config;
+    public static Config config;
     public static BetterDungeons main;
-    public FloorsConf floorsConf;
+    private FloorsConf floorsConf;
+    private RoomsConf roomsConf;
     private World world;
     private final List<Floor> loadedfloors = new ArrayList<>();
+    private final List<Room> loadedrooms = new ArrayList<>();
     private final List<String> types = new ArrayList<>();
     private final List<TypeMenu> typeMenus = new ArrayList<>();
     private final List<ActiveDungeon> activeDungeons = new ArrayList<>();
@@ -38,8 +40,10 @@ public final class BetterDungeons extends JavaPlugin {
         main = this;
         saveDefaultConfig();
         floorsConf = new FloorsConf();
+        roomsConf = new RoomsConf();
         config = new Config(getConfig());
         createWorld();
+        loadRooms();
         loadFloors();
         Objects.requireNonNull(getCommand("BD")).setTabCompleter(new Completer());
         Objects.requireNonNull(getCommand("BD")).setExecutor(new CmdExecutor());
@@ -57,9 +61,18 @@ public final class BetterDungeons extends JavaPlugin {
         for(String floorkey : floorsConf.getFloors()){
             final ConfigurationSection section = floorsConf.getConfig().getConfigurationSection(floorkey);
             assert section != null;
-            String name = section.getName();
-            final Floor floor = new Floor(name);
+            String id = section.getName();
+            final Floor floor = new Floor(id);
             this.loadedfloors.add(floor);
+        }
+    }
+    private void loadRooms(){
+        for(String roomkey : roomsConf.getRooms()){
+            final ConfigurationSection section = floorsConf.getConfig().getConfigurationSection(roomkey);
+            assert section != null;
+            String id = section.getName();
+            final Room room = new Room(id);
+            this.loadedrooms.add(room);
         }
     }
     private void loadGuis(){
@@ -90,6 +103,9 @@ public final class BetterDungeons extends JavaPlugin {
     public List<Floor> getLoadedfloors(){
         return loadedfloors;
     }
+    public List<Room> getLoadedrooms() {
+        return loadedrooms;
+    }
     public List<String> getTypes(){
         return types;
     }
@@ -104,5 +120,11 @@ public final class BetterDungeons extends JavaPlugin {
     }
     public List<Double> getUsedLocations() {
         return usedLocations;
+    }
+    public FloorsConf getFloorsConf() {
+        return floorsConf;
+    }
+    public RoomsConf getRoomsConf(){
+        return roomsConf;
     }
 }

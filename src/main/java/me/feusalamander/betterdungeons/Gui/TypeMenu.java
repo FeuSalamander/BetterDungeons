@@ -1,7 +1,7 @@
 package me.feusalamander.betterdungeons.Gui;
 
 import me.feusalamander.betterdungeons.BetterDungeons;
-import me.feusalamander.betterdungeons.Floor;
+import me.feusalamander.betterdungeons.Manageurs.Floor;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.Inventory;
 

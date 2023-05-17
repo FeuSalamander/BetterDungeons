@@ -1,8 +1,8 @@
 package me.feusalamander.betterdungeons.Gui;
 
-import me.feusalamander.betterdungeons.ActiveDungeon;
+import me.feusalamander.betterdungeons.Manageurs.ActiveDungeon;
 import me.feusalamander.betterdungeons.BetterDungeons;
-import me.feusalamander.betterdungeons.Floor;
+import me.feusalamander.betterdungeons.Manageurs.Floor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
