@@ -1,6 +1,6 @@
 1:
   name: SpawnRoom
-  path: "spawn.schem"
+  path: "rooms/spawn.schem"
   size: 1x1
   activated: true
   type: start

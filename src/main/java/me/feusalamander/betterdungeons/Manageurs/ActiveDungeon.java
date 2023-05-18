@@ -17,21 +17,23 @@ import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 public class ActiveDungeon {
     BetterDungeons main = BetterDungeons.main;
+    private double dungeonLoc = 992;
+    private Location playerSpawn;
     private final List<Player> players;
     private final Floor floor;
     private final World world = BetterDungeons.main.getWorld();
-    private Location spawn;
     private EditSession editSession;
     private int editCount = 0;
     private Room start;
     private Room end;
     private final Random rand = new Random();
+    private Room[][] matrix;
+    private Location lastLoc;
 
     public ActiveDungeon(List<Player> players, Floor floor){
         this.players = players;
@@ -40,17 +42,17 @@ public class ActiveDungeon {
     }
     private void createDungeon(){
         main.getActivedungeons().add(this);
-        double loc = 992;
-        while (main.getUsedLocations().contains(loc)){
-            loc = loc + 992;
+        while (main.getUsedLocations().contains(dungeonLoc)){
+            dungeonLoc = dungeonLoc + 992;
         }
-        main.getUsedLocations().add(loc);
-        spawn = new Location(world, 0, 50, loc);
+        main.getUsedLocations().add(dungeonLoc);
+        lastLoc = new Location(world, 0, 50, dungeonLoc);
         editSession = WorldEdit.getInstance().newEditSession(new BukkitWorld(world));
         createRooms();
         editSession.close();
         for(Player p : players){
-            p.teleport(spawn);
+            p.teleport(playerSpawn);
+            Bukkit.broadcastMessage(playerSpawn.getX()+" "+ playerSpawn.getZ());
         }
     }
     public void unload(){
@@ -58,7 +60,7 @@ public class ActiveDungeon {
         for(Player p : players){
             p.teleport(loc);
         }
-        main.getUsedLocations().remove(spawn.getZ());
+        main.getUsedLocations().remove(dungeonLoc);
         for(int i = 1; i<= editCount; i++){
             editSession.undo(editSession);
         }
@@ -93,14 +95,32 @@ public class ActiveDungeon {
     private void createRooms(){
         roomQuery();
         int size = floor.getSize();
-        Room[][] model = new Room[size][size];
+        matrix = new Room[size][size];
         boolean cl = rand.nextBoolean();
         int rand1 = rand.nextInt(2);
-        if(cl){model[rand1*(size-1)][rand.nextInt(size)] = start;}else{model[rand.nextInt(size)][rand1*(size-1)] = start;}
-        useSchematic(spawn, start.getPath());
+        if(cl){matrix[rand1*(size-1)][rand.nextInt(size)] = start;}else{matrix[rand.nextInt(size)][rand1*(size-1)] = start;}
+        build();
+    }
+    private void build(){
+        for(Room[] line : matrix){
+            for(Room box : line){
+                if(box == null){
+                    useSchematic(lastLoc, "rooms/null.schematic");
+                }else {
+                    if(box.getType().equalsIgnoreCase("start"))playerSpawn = new Location(world, lastLoc.getX(), 50, lastLoc.getZ());
+                    useSchematic(lastLoc, box.getPath());
+                }
+                if(lastLoc.getX() < (floor.getSize()-1)*32){
+                    lastLoc.set(lastLoc.getX()+32, 50, lastLoc.getZ());
+                }else{
+                    lastLoc.set(0, 50, lastLoc.getZ()+32);
+                }
+            }
+        }
     }
     private void useSchematic(Location loc, String path){
         File schematic = new File(main.getDataFolder(), path);
+        if(!schematic.exists())schematic = new File(main.getDataFolder(), "rooms/null.schematic");
         ClipboardFormat format = ClipboardFormats.findByFile(schematic);
         assert format != null;
         try (ClipboardReader reader = format.getReader(new FileInputStream(schematic))) {
