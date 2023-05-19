@@ -4,3 +4,9 @@
   size: 1x1
   activated: true
   type: start
+2:
+  name: path
+  path: "rooms/path.schematic"
+  size: 1x1
+  activated: true
+  type: room

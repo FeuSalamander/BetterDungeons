@@ -32,8 +32,11 @@ public class ActiveDungeon {
     private Room start;
     private Room end;
     private final Random rand = new Random();
+    private List<Room> rooms = new ArrayList<>();
     private Room[][] matrix;
     private Location lastLoc;
+    private int spawnX;
+    private int spawnY;
 
     public ActiveDungeon(List<Player> players, Floor floor){
         this.players = players;
@@ -43,7 +46,7 @@ public class ActiveDungeon {
     private void createDungeon(){
         main.getActivedungeons().add(this);
         while (main.getUsedLocations().contains(dungeonLoc)){
-            dungeonLoc = dungeonLoc + 992;
+            dungeonLoc += 992;
         }
         main.getUsedLocations().add(dungeonLoc);
         lastLoc = new Location(world, 0, 50, dungeonLoc);
@@ -52,7 +55,6 @@ public class ActiveDungeon {
         editSession.close();
         for(Player p : players){
             p.teleport(playerSpawn);
-            Bukkit.broadcastMessage(playerSpawn.getX()+" "+ playerSpawn.getZ());
         }
     }
     public void unload(){
@@ -67,7 +69,6 @@ public class ActiveDungeon {
 
     }
     private void roomQuery(){
-        List<Room> rooms = new ArrayList<>();
         start = null;
         end = null;
         for(Integer id : floor.getRooms()){
@@ -98,29 +99,62 @@ public class ActiveDungeon {
         matrix = new Room[size][size];
         boolean cl = rand.nextBoolean();
         int rand1 = rand.nextInt(2);
-        if(cl){matrix[rand1*(size-1)][rand.nextInt(size)] = start;}else{matrix[rand.nextInt(size)][rand1*(size-1)] = start;}
+        if(cl){spawnX = rand1*(size-1);spawnY = rand.nextInt(size);}else{spawnY = rand1*(size-1);spawnX = rand.nextInt(size);}
+        matrix[spawnX][spawnY] = start;
+        Bukkit.broadcastMessage("spawn at: "+spawnX+ " " + spawnY);
+        createPath();
         build();
     }
+    private void createPath(){
+        int pathLength = (int)(floor.getSize()*1.5);
+        int curX = spawnX;
+        int curY = spawnY;
+        while(pathLength>-1){
+            Room room = rooms.get(rand.nextInt(rooms.size()));
+            boolean negative = rand.nextBoolean();
+            boolean XorY = rand.nextBoolean();
+            int nextCord;
+            if(negative){
+                nextCord = -1;
+            }else{
+                nextCord = 1;
+            }
+            if(XorY){
+                if(curX+ nextCord < floor.getSize()&&curX+ nextCord >= 0){
+                    curX += nextCord;
+                }
+            }else {
+                if(curY+ nextCord < floor.getSize()&&curY+ nextCord >= 0){
+                    curY += nextCord;
+                }
+            }
+            if(matrix[curX][curY] == null){
+                Bukkit.broadcastMessage(room.getName()+" at: "+curX+ " " + curY);
+                matrix[curX][curY]= room;
+                pathLength--;
+            }
+        }
+    }
     private void build(){
-        for(Room[] line : matrix){
-            for(Room box : line){
+        for(Room[] colon : matrix){
+            for(Room box : colon){
                 if(box == null){
-                    useSchematic(lastLoc, "rooms/null.schematic");
+                    useSchematic(lastLoc, "rooms/null.schem");
                 }else {
-                    if(box.getType().equalsIgnoreCase("start"))playerSpawn = new Location(world, lastLoc.getX(), 50, lastLoc.getZ());
+                    if(box.getType().equalsIgnoreCase("start"))playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ());
                     useSchematic(lastLoc, box.getPath());
                 }
-                if(lastLoc.getX() < (floor.getSize()-1)*32){
-                    lastLoc.set(lastLoc.getX()+32, 50, lastLoc.getZ());
+                if(lastLoc.getZ() < ((floor.getSize()-1)*32)+dungeonLoc){
+                    lastLoc.set(lastLoc.getX(), 50, lastLoc.getZ()+32);
                 }else{
-                    lastLoc.set(0, 50, lastLoc.getZ()+32);
+                    lastLoc.set(lastLoc.getX()+32, 50, dungeonLoc);
                 }
             }
         }
     }
     private void useSchematic(Location loc, String path){
         File schematic = new File(main.getDataFolder(), path);
-        if(!schematic.exists())schematic = new File(main.getDataFolder(), "rooms/null.schematic");
+        if(!schematic.exists())schematic = new File(main.getDataFolder(), "rooms/null.schem");
         ClipboardFormat format = ClipboardFormats.findByFile(schematic);
         assert format != null;
         try (ClipboardReader reader = format.getReader(new FileInputStream(schematic))) {

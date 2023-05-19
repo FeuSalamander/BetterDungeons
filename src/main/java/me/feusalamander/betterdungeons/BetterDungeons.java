@@ -68,7 +68,7 @@ public final class BetterDungeons extends JavaPlugin {
     }
     private void loadRooms(){
         for(String roomkey : roomsConf.getRooms()){
-            final ConfigurationSection section = floorsConf.getConfig().getConfigurationSection(roomkey);
+            final ConfigurationSection section = roomsConf.getConfig().getConfigurationSection(roomkey);
             assert section != null;
             String id = section.getName();
             final Room room = new Room(id);
