@@ -101,37 +101,38 @@ public class ActiveDungeon {
         int rand1 = rand.nextInt(2);
         if(cl){spawnX = rand1*(size-1);spawnY = rand.nextInt(size);}else{spawnY = rand1*(size-1);spawnX = rand.nextInt(size);}
         matrix[spawnX][spawnY] = start;
-        Bukkit.broadcastMessage("spawn at: "+spawnX+ " " + spawnY);
         createPath();
         build();
     }
     private void createPath(){
-        int pathLength = (int)(floor.getSize()*1.5);
+        int pathLength = ((floor.getSize()*floor.getSize())/2);
         int curX = spawnX;
         int curY = spawnY;
-        while(pathLength>-1){
+        int newX = spawnX;
+        int newY = spawnY;
+        while(pathLength>0){
             Room room = rooms.get(rand.nextInt(rooms.size()));
             boolean negative = rand.nextBoolean();
             boolean XorY = rand.nextBoolean();
             int nextCord;
-            if(negative){
-                nextCord = -1;
-            }else{
-                nextCord = 1;
-            }
+            if(negative){nextCord = -1;}else{nextCord = 1;}
             if(XorY){
-                if(curX+ nextCord < floor.getSize()&&curX+ nextCord >= 0){
-                    curX += nextCord;
+                if(curX+nextCord < floor.getSize()&&curX+ nextCord >= 0){
+                    newX = curX+nextCord;
                 }
             }else {
                 if(curY+ nextCord < floor.getSize()&&curY+ nextCord >= 0){
-                    curY += nextCord;
+                    newY = curY+nextCord;
                 }
             }
-            if(matrix[curX][curY] == null){
-                Bukkit.broadcastMessage(room.getName()+" at: "+curX+ " " + curY);
+            if(matrix[newX][newY] == null){
+                curX = newX;
+                curY = newY;
                 matrix[curX][curY]= room;
                 pathLength--;
+            }else{
+                newX = curX;
+                newY = curY;
             }
         }
     }
