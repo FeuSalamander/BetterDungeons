@@ -9,17 +9,18 @@ import java.util.Objects;
 
 @SuppressWarnings("deprecation")
 public class Room {
-    private final String name;
+    private String name = null;
     private final String id;
-    private final boolean activated;
-    private final int sizex;
-    private final int sizey;
-    private final String path;
-    private final String type;
+    private boolean activated = false;
+    private int sizex = 0;
+    private int sizey = 0;
+    private String path = null;
+    private String type = null;
     private final BetterDungeons main = BetterDungeons.main;
 
     public Room(final String id){
         this.id = id;
+        if(id.equalsIgnoreCase("-1"))return;
         final ConfigurationSection section = main.getRoomsConf().getConfig().getConfigurationSection(id);
         assert section != null;
         name = section.getString("name");

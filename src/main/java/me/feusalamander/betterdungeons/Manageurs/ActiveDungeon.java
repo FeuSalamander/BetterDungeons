@@ -32,7 +32,7 @@ public class ActiveDungeon {
     private Room start;
     private Room end;
     private final Random rand = new Random();
-    private List<Room> rooms = new ArrayList<>();
+    private final List<Room> rooms = new ArrayList<>();
     private Room[][] matrix;
     private Location lastLoc;
     private int spawnX;
@@ -110,8 +110,9 @@ public class ActiveDungeon {
         int curY = spawnY;
         int newX = spawnX;
         int newY = spawnY;
+        int crash = 0;
         while(pathLength>0){
-            Room room = rooms.get(rand.nextInt(rooms.size()));
+            if(crash > 20)break;
             boolean negative = rand.nextBoolean();
             boolean XorY = rand.nextBoolean();
             int nextCord;
@@ -128,11 +129,64 @@ public class ActiveDungeon {
             if(matrix[newX][newY] == null){
                 curX = newX;
                 curY = newY;
-                matrix[curX][curY]= room;
+                addSizedRoom(newX, newY);
                 pathLength--;
+                crash = 0;
             }else{
                 newX = curX;
                 newY = curY;
+                crash += 1;
+            }
+        }
+    }
+    private void addSizedRoom(int X, int Y){
+        List<Room> roomList = rooms;
+        Room room = null;
+        boolean possible = false;
+        int multiplication = 0;
+        while (!possible){
+            multiplication = 1;
+            room = roomList.get(rand.nextInt(roomList.size()));
+            if(room.getSizeX() == 1&&room.getSizeY() == 1){matrix[X][Y] = room;return;}
+            possible = true;
+            for(int i = 0; i< room.getSizeX(); i++){
+                for(int i2 = 0; i2< room.getSizeY(); i2++){
+                    if(X+i< floor.getSize()&&Y+i2< floor.getSize()){
+                        if(matrix[X+i][Y+i2] != null){
+                            possible = false;
+                            break;
+                        }
+                    }else{
+                        possible = false;
+                        break;
+                    }
+                }
+                if(!possible)break;
+            }
+            if(!possible){
+                multiplication = -1;
+                possible = true;
+                for(int i = 0; i< room.getSizeX(); i++){
+                    for(int i2 = 0; i2< room.getSizeY(); i2++){
+                        if(X-i< floor.getSize()&&Y-i2< floor.getSize()){
+                            if(matrix[X-i][Y-i2] != null){
+                                possible = false;
+                                break;
+                            }
+                        }else{
+                            possible = false;
+                            break;
+                        }
+                    }
+                    if(!possible)break;
+                }
+            }
+            rooms.remove(room);
+        }
+        matrix[X][Y] = room;
+        for(int i = 0; i< room.getSizeX(); i++){
+            for(int i2 = 0; i2< room.getSizeY(); i2++){
+                if(matrix[X+multiplication*i][Y+multiplication*i2] == null)matrix[X+multiplication*i][Y+multiplication*i2] = main.getPlaceholderRoom();
             }
         }
     }
@@ -141,7 +195,7 @@ public class ActiveDungeon {
             for(Room box : colon){
                 if(box == null){
                     useSchematic(lastLoc, "rooms/null.schem");
-                }else {
+                }else if (!box.equals(main.getPlaceholderRoom())){
                     if(box.getType().equalsIgnoreCase("start"))playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ());
                     useSchematic(lastLoc, box.getPath());
                 }

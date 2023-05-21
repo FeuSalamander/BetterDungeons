@@ -10,3 +10,15 @@
   size: 1x1
   activated: true
   type: room
+3:
+  name: 2
+  path: "rooms/2.schematic"
+  size: 1x2
+  activated: true
+  type: room
+4:
+  name: 4
+  path: "rooms/4.schematic"
+  size: 2x2
+  activated: true
+  type: room
