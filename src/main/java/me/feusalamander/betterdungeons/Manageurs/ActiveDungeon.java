@@ -139,54 +139,71 @@ public class ActiveDungeon {
             }
         }
     }
-    private void addSizedRoom(int X, int Y){
-        List<Room> roomList = rooms;
+    private void addSizedRoom(int X, int Y) {
+        List<Room> roomList = new ArrayList<>(rooms);
         Room room = null;
         boolean possible = false;
         int multiplication = 0;
-        while (!possible){
+
+        while (!possible) {
             multiplication = 1;
             room = roomList.get(rand.nextInt(roomList.size()));
-            if(room.getSizeX() == 1&&room.getSizeY() == 1){matrix[X][Y] = room;return;}
+            if (room.getSizeX() == 1 && room.getSizeY() == 1) {
+                matrix[X][Y] = room;
+                return;
+            }
+
             possible = true;
-            for(int i = 0; i< room.getSizeX(); i++){
-                for(int i2 = 0; i2< room.getSizeY(); i2++){
-                    if(X+i< floor.getSize()&&Y+i2< floor.getSize()){
-                        if(matrix[X+i][Y+i2] != null){
-                            possible = false;
-                            break;
-                        }
-                    }else{
+
+            for (int i = 0; i < room.getSizeX(); i++) {
+                for (int i2 = 0; i2 < room.getSizeY(); i2++) {
+                    if (!isValidPosition(X + i, Y + i2)) {
+                        possible = false;
+                        break;
+                    }
+                    if (matrix[X + i][Y + i2] != null) {
                         possible = false;
                         break;
                     }
                 }
-                if(!possible)break;
+                if (!possible) {
+                    break;
+                }
             }
-            if(!possible){
+
+            if (!possible) {
                 multiplication = -1;
                 possible = true;
-                for(int i = 0; i< room.getSizeX(); i++){
-                    for(int i2 = 0; i2< room.getSizeY(); i2++){
-                        if(X-i< floor.getSize()&&Y-i2< floor.getSize()){
-                            if(matrix[X-i][Y-i2] != null){
-                                possible = false;
-                                break;
-                            }
-                        }else{
+
+                for (int i = 0; i < room.getSizeX(); i++) {
+                    for (int i2 = 0; i2 < room.getSizeY(); i2++) {
+                        if (!isValidPosition(X - i, Y - i2)) {
+                            possible = false;
+                            break;
+                        }
+                        if (matrix[X - i][Y - i2] != null) {
                             possible = false;
                             break;
                         }
                     }
-                    if(!possible)break;
+                    if (!possible) {
+                        break;
+                    }
                 }
             }
+
             rooms.remove(room);
         }
+
         matrix[X][Y] = room;
-        for(int i = 0; i< room.getSizeX(); i++){
-            for(int i2 = 0; i2< room.getSizeY(); i2++){
-                if(matrix[X+multiplication*i][Y+multiplication*i2] == null)matrix[X+multiplication*i][Y+multiplication*i2] = main.getPlaceholderRoom();
+
+        for (int i = 0; i < room.getSizeX(); i++) {
+            for (int i2 = 0; i2 < room.getSizeY(); i2++) {
+                int newX = X + (multiplication * i);
+                int newY = Y + (multiplication * i2);
+                if (matrix[newX][newY] == null) {
+                    matrix[newX][newY] = main.getPlaceholderRoom();
+                }
             }
         }
     }
@@ -224,6 +241,9 @@ public class ActiveDungeon {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+    private boolean isValidPosition(int X, int Y) {
+        return X >= 0 && X < floor.getSize() && Y >= 0 && Y < floor.getSize();
     }
     public List<Player> getPlayers() {
         return players;
