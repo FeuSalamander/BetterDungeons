@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -104,38 +105,39 @@ public class ActiveDungeon {
         createPath();
         build();
     }
-    private void createPath(){
-        int pathLength = ((floor.getSize()*floor.getSize())/2);
+    private void createPath() {
+        int pathLength = (floor.getSize() * floor.getSize()) / 2;
         int curX = spawnX;
         int curY = spawnY;
         int newX = spawnX;
         int newY = spawnY;
         int crash = 0;
-        while(pathLength>0){
-            if(crash > 20)break;
+
+        while (pathLength > 0) {
+            if (crash > 20) {
+                break;
+            }
+
             boolean negative = rand.nextBoolean();
             boolean XorY = rand.nextBoolean();
-            int nextCord;
-            if(negative){nextCord = -1;}else{nextCord = 1;}
-            if(XorY){
-                if(curX+nextCord < floor.getSize()&&curX+ nextCord >= 0){
-                    newX = curX+nextCord;
-                }
-            }else {
-                if(curY+ nextCord < floor.getSize()&&curY+ nextCord >= 0){
-                    newY = curY+nextCord;
-                }
+            int nextCord = negative ? -1 : 1;
+
+            if (XorY && isValidPosition(curX + nextCord, curY)) {
+                newX = curX + nextCord;
+            } else if (!XorY && isValidPosition(curX, curY + nextCord)) {
+                newY = curY + nextCord;
             }
-            if(matrix[newX][newY] == null){
+
+            if (matrix[newX][newY] == null) {
                 curX = newX;
                 curY = newY;
                 addSizedRoom(newX, newY);
                 pathLength--;
                 crash = 0;
-            }else{
+            } else {
                 newX = curX;
                 newY = curY;
-                crash += 1;
+                crash++;
             }
         }
     }
@@ -194,9 +196,8 @@ public class ActiveDungeon {
 
             rooms.remove(room);
         }
-
         matrix[X][Y] = room;
-
+        room.setModified(multiplication);
         for (int i = 0; i < room.getSizeX(); i++) {
             for (int i2 = 0; i2 < room.getSizeY(); i2++) {
                 int newX = X + (multiplication * i);
@@ -214,7 +215,13 @@ public class ActiveDungeon {
                     useSchematic(lastLoc, "rooms/null.schem");
                 }else if (!box.equals(main.getPlaceholderRoom())){
                     if(box.getType().equalsIgnoreCase("start"))playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ());
-                    useSchematic(lastLoc, box.getPath());
+                    if(box.getSizeX()>1||box.getSizeY()>1){
+                        Location newLoc = lastLoc.clone();
+                        newLoc.add(box.getModifiedX(), 0, box.getModifiedY());
+                        useSchematic(newLoc, box.getPath());
+                    }else {
+                        useSchematic(lastLoc, box.getPath());
+                    }
                 }
                 if(lastLoc.getZ() < ((floor.getSize()-1)*32)+dungeonLoc){
                     lastLoc.set(lastLoc.getX(), 50, lastLoc.getZ()+32);

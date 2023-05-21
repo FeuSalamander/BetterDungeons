@@ -17,7 +17,9 @@ public class Room {
     private String path = null;
     private String type = null;
     private final BetterDungeons main = BetterDungeons.main;
-
+    private int modifiedX = 0;
+    private int modifiedY = 0;
+    private int ratio = 1;
     public Room(final String id){
         this.id = id;
         if(id.equalsIgnoreCase("-1"))return;
@@ -31,6 +33,8 @@ public class Room {
         sizey = Integer.parseInt(split[1]);
         type = section.getString("type");
         issues();
+        modifiedX = (sizex-1)*16;
+        modifiedY = (sizey-1)*16;
     }
     private void issues(){
         if(name == null){
@@ -73,5 +77,14 @@ public class Room {
     }
     public String getPath() {
         return path;
+    }
+    public int getModifiedX() {
+        return modifiedX*ratio;
+    }
+    public int getModifiedY() {
+        return modifiedY*ratio;
+    }
+    public void setModified(int number) {
+        this.ratio = number;
     }
 }
