@@ -19,7 +19,6 @@ public class Room {
     private final BetterDungeons main = BetterDungeons.main;
     private int modifiedX = 0;
     private int modifiedY = 0;
-    private int ratio = 1;
     public Room(final String id){
         this.id = id;
         if(id.equalsIgnoreCase("-1"))return;
@@ -79,12 +78,9 @@ public class Room {
         return path;
     }
     public int getModifiedX() {
-        return modifiedX*ratio;
+        return modifiedX;
     }
     public int getModifiedY() {
-        return modifiedY*ratio;
-    }
-    public void setModified(int number) {
-        this.ratio = number;
+        return modifiedY;
     }
 }

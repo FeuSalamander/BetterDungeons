@@ -10,6 +10,8 @@ import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.math.transform.AffineTransform;
+import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import me.feusalamander.betterdungeons.BetterDungeons;
 import org.bukkit.*;
@@ -34,7 +36,7 @@ public class ActiveDungeon {
     private Room end;
     private final Random rand = new Random();
     private final List<Room> rooms = new ArrayList<>();
-    private Room[][] matrix;
+    private ActiveRoom[][] matrix;
     private Location lastLoc;
     private int spawnX;
     private int spawnY;
@@ -97,49 +99,17 @@ public class ActiveDungeon {
     private void createRooms(){
         roomQuery();
         int size = floor.getSize();
-        matrix = new Room[size][size];
+        matrix = new ActiveRoom[size][size];
         boolean cl = rand.nextBoolean();
         int rand1 = rand.nextInt(2);
-        if(cl){spawnX = rand1*(size-1);spawnY = rand.nextInt(size);}else{spawnY = rand1*(size-1);spawnX = rand.nextInt(size);}
-        matrix[spawnX][spawnY] = start;
+        int rotation = 0;
+        if(cl){spawnX = rand1*(size-1);spawnY = rand.nextInt(size);if(spawnX == 0){rotation = -90;}else {rotation = 90;}}else{spawnY = rand1*(size-1);if(spawnY == 0)rotation = 180;spawnX = rand.nextInt(size);}
+        addActiveRoom(spawnX, spawnY, start, rotation, 1);
         createPath();
         build();
     }
     private void createPath() {
-        int pathLength = (floor.getSize() * floor.getSize()) / 2;
-        int curX = spawnX;
-        int curY = spawnY;
-        int newX = spawnX;
-        int newY = spawnY;
-        int crash = 0;
 
-        while (pathLength > 0) {
-            if (crash > 20) {
-                break;
-            }
-
-            boolean negative = rand.nextBoolean();
-            boolean XorY = rand.nextBoolean();
-            int nextCord = negative ? -1 : 1;
-
-            if (XorY && isValidPosition(curX + nextCord, curY)) {
-                newX = curX + nextCord;
-            } else if (!XorY && isValidPosition(curX, curY + nextCord)) {
-                newY = curY + nextCord;
-            }
-
-            if (matrix[newX][newY] == null) {
-                curX = newX;
-                curY = newY;
-                addSizedRoom(newX, newY);
-                pathLength--;
-                crash = 0;
-            } else {
-                newX = curX;
-                newY = curY;
-                crash++;
-            }
-        }
     }
     private void addSizedRoom(int X, int Y) {
         List<Room> roomList = new ArrayList<>(rooms);
@@ -151,10 +121,9 @@ public class ActiveDungeon {
             multiplication = 1;
             room = roomList.get(rand.nextInt(roomList.size()));
             if (room.getSizeX() == 1 && room.getSizeY() == 1) {
-                matrix[X][Y] = room;
+                addActiveRoom(X, Y, room, 0, 1);
                 return;
             }
-
             possible = true;
 
             for (int i = 0; i < room.getSizeX(); i++) {
@@ -196,31 +165,30 @@ public class ActiveDungeon {
 
             rooms.remove(room);
         }
-        matrix[X][Y] = room;
-        room.setModified(multiplication);
+        addActiveRoom(X, Y, room, 0, multiplication);
         for (int i = 0; i < room.getSizeX(); i++) {
             for (int i2 = 0; i2 < room.getSizeY(); i2++) {
                 int newX = X + (multiplication * i);
                 int newY = Y + (multiplication * i2);
                 if (matrix[newX][newY] == null) {
-                    matrix[newX][newY] = main.getPlaceholderRoom();
+                    addActiveRoom(newX, newY, main.getPlaceholderRoom(), 0, 1);
                 }
             }
         }
     }
     private void build(){
-        for(Room[] colon : matrix){
-            for(Room box : colon){
+        for(ActiveRoom[] colon : matrix){
+            for(ActiveRoom box : colon){
                 if(box == null){
-                    useSchematic(lastLoc, "rooms/null.schem");
-                }else if (!box.equals(main.getPlaceholderRoom())){
-                    if(box.getType().equalsIgnoreCase("start"))playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ());
-                    if(box.getSizeX()>1||box.getSizeY()>1){
+                    useSchematic(lastLoc, "rooms/null.schem", 0);
+                }else if (!box.getRoom().equals(main.getPlaceholderRoom())){
+                    if(box.getRoom().getType().equalsIgnoreCase("start"))playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ());
+                    if(box.getRoom().getSizeX()>1||box.getRoom().getSizeY()>1){
                         Location newLoc = lastLoc.clone();
                         newLoc.add(box.getModifiedX(), 0, box.getModifiedY());
-                        useSchematic(newLoc, box.getPath());
+                        useSchematic(newLoc, box.getRoom().getPath(), box.getRotation());
                     }else {
-                        useSchematic(lastLoc, box.getPath());
+                        useSchematic(lastLoc, box.getRoom().getPath(), box.getRotation());
                     }
                 }
                 if(lastLoc.getZ() < ((floor.getSize()-1)*32)+dungeonLoc){
@@ -231,15 +199,17 @@ public class ActiveDungeon {
             }
         }
     }
-    private void useSchematic(Location loc, String path){
+    private void useSchematic(Location loc, String path, int rotation){
         File schematic = new File(main.getDataFolder(), path);
         if(!schematic.exists())schematic = new File(main.getDataFolder(), "rooms/null.schem");
         ClipboardFormat format = ClipboardFormats.findByFile(schematic);
         assert format != null;
         try (ClipboardReader reader = format.getReader(new FileInputStream(schematic))) {
             Clipboard clipboard = reader.read();
-            Operation operation = new ClipboardHolder(clipboard)
-                    .createPaste(editSession)
+            ClipboardHolder clipboardHolder = new ClipboardHolder(clipboard);
+            AffineTransform transform = new AffineTransform().rotateY(rotation);
+            clipboardHolder.setTransform(transform);
+            Operation operation = clipboardHolder.createPaste(editSession)
                     .to(BlockVector3.at(loc.getX(), loc.getY(), loc.getZ()))
                     .ignoreAirBlocks(false)
                     .build();
@@ -252,6 +222,10 @@ public class ActiveDungeon {
     private boolean isValidPosition(int X, int Y) {
         return X >= 0 && X < floor.getSize() && Y >= 0 && Y < floor.getSize();
     }
+    private void addActiveRoom(int X, int Y, Room room, int rotation, int ratio){
+        ActiveRoom activeRoom = new ActiveRoom(X, Y, room, rotation, ratio);
+        matrix[X][Y] = activeRoom;
+    }
     public List<Player> getPlayers() {
         return players;
     }
@@ -261,4 +235,40 @@ public class ActiveDungeon {
     public World getWorld(){
         return world;
     }
+    //private void createPath() {
+    //        int pathLength = (floor.getSize() * floor.getSize()) / 2;
+    //        int curX = spawnX;
+    //        int curY = spawnY;
+    //        int newX = spawnX;
+    //        int newY = spawnY;
+    //        int crash = 0;
+    //
+    //        while (pathLength > 0) {
+    //            if (crash > 20) {
+    //                break;
+    //            }
+    //
+    //            boolean negative = rand.nextBoolean();
+    //            boolean XorY = rand.nextBoolean();
+    //            int nextCord = negative ? -1 : 1;
+    //
+    //            if (XorY && isValidPosition(curX + nextCord, curY)) {
+    //                newX = curX + nextCord;
+    //            } else if (!XorY && isValidPosition(curX, curY + nextCord)) {
+    //                newY = curY + nextCord;
+    //            }
+    //
+    //            if (matrix[newX][newY] == null) {
+    //                curX = newX;
+    //                curY = newY;
+    //                addSizedRoom(newX, newY);
+    //                pathLength--;
+    //                crash = 0;
+    //            } else {
+    //                newX = curX;
+    //                newY = curY;
+    //                crash++;
+    //            }
+    //        }
+    //    }
 }
