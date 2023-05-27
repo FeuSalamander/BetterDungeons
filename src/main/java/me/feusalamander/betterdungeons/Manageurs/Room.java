@@ -1,9 +1,12 @@
 package me.feusalamander.betterdungeons.Manageurs;
 
 import me.feusalamander.betterdungeons.BetterDungeons;
+import me.feusalamander.betterdungeons.DirectionEnum;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
+import scala.Int;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,6 +22,7 @@ public class Room {
     private final BetterDungeons main = BetterDungeons.main;
     private int modifiedX = 0;
     private int modifiedY = 0;
+    private List<Boolean> directions;
     public Room(final String id){
         this.id = id;
         if(id.equalsIgnoreCase("-1"))return;
@@ -31,6 +35,11 @@ public class Room {
         sizex = Integer.parseInt(split[0]);
         sizey = Integer.parseInt(split[1]);
         type = section.getString("type");
+        directions = new ArrayList<>(4);
+        for (int i = 0; i < 4; i++) {directions.add(false);}
+        for(String s : section.getStringList("doors")){
+            directions.set(DirectionEnum.valueOf(s).ordinal(), true);
+        }
         issues();
         modifiedX = (sizex-1)*16;
         modifiedY = (sizey-1)*16;
@@ -82,5 +91,8 @@ public class Room {
     }
     public int getModifiedY() {
         return modifiedY;
+    }
+    public List<Boolean> getDirections() {
+        return directions;
     }
 }

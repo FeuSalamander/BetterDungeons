@@ -11,15 +11,14 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.math.transform.AffineTransform;
-import com.sk89q.worldedit.math.transform.Transform;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import me.feusalamander.betterdungeons.BetterDungeons;
+import me.feusalamander.betterdungeons.DirectionEnum;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -103,13 +102,18 @@ public class ActiveDungeon {
         boolean cl = rand.nextBoolean();
         int rand1 = rand.nextInt(2);
         int rotation = 0;
-        if(cl){spawnX = rand1*(size-1);spawnY = rand.nextInt(size);if(spawnX == 0){rotation = -90;}else {rotation = 90;}}else{spawnY = rand1*(size-1);if(spawnY == 0)rotation = 180;spawnX = rand.nextInt(size);}
+        if(cl){spawnX = rand1*(size-1);spawnY = rand.nextInt(size);if(spawnX == 0){rotation = -90;} else {rotation = 90;}} else{spawnY = rand1*(size-1);if(spawnY == 0) rotation = 180;spawnX = rand.nextInt(size);}
         addActiveRoom(spawnX, spawnY, start, rotation, 1);
         createPath();
         build();
     }
     private void createPath() {
-
+        List<int[]> roomList = getDoors(spawnX, spawnY);
+        for(int[] coord : roomList){
+            int X = coord[0];
+            int Y = coord[1];
+            addSizedRoom(X, Y);
+        }
     }
     private void addSizedRoom(int X, int Y) {
         List<Room> roomList = new ArrayList<>(rooms);
@@ -182,7 +186,10 @@ public class ActiveDungeon {
                 if(box == null){
                     useSchematic(lastLoc, "rooms/null.schem", 0);
                 }else if (!box.getRoom().equals(main.getPlaceholderRoom())){
-                    if(box.getRoom().getType().equalsIgnoreCase("start"))playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ());
+                    if(box.getRoom().getType().equalsIgnoreCase("start")){
+                        playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ(), 180-box.getRotation(), 0);
+                        Bukkit.broadcastMessage(box.getRotation()+"");
+                    }
                     if(box.getRoom().getSizeX()>1||box.getRoom().getSizeY()>1){
                         Location newLoc = lastLoc.clone();
                         newLoc.add(box.getModifiedX(), 0, box.getModifiedY());
@@ -225,6 +232,31 @@ public class ActiveDungeon {
     private void addActiveRoom(int X, int Y, Room room, int rotation, int ratio){
         ActiveRoom activeRoom = new ActiveRoom(X, Y, room, rotation, ratio);
         matrix[X][Y] = activeRoom;
+    }
+    private List<int[]> getDoors(int x,int y){
+        ActiveRoom room = matrix[x][y];
+        List<int[]> accessibleCoordinates = new ArrayList<>();
+        if (room.isAccessible(DirectionEnum.NORTH)) {
+            if(isValidPosition(x, y-1)){
+                accessibleCoordinates.add(new int[]{x, y-1});
+            }
+        }
+        if (room.isAccessible(DirectionEnum.SOUTH)) {
+            if(isValidPosition(x, y+1)){
+                accessibleCoordinates.add(new int[]{x, y+1});
+            }
+        }
+        if (room.isAccessible(DirectionEnum.EAST)) {
+            if(isValidPosition(x+1, y)){
+                accessibleCoordinates.add(new int[]{x+1, y});
+            }
+        }
+        if (room.isAccessible(DirectionEnum.WEST)) {
+            if(isValidPosition(x-1, y)){
+                accessibleCoordinates.add(new int[]{x-1, y});
+            }
+        }
+        return accessibleCoordinates;
     }
     public List<Player> getPlayers() {
         return players;

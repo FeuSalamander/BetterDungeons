@@ -1,5 +1,8 @@
 package me.feusalamander.betterdungeons.Manageurs;
 
+import me.feusalamander.betterdungeons.DirectionEnum;
+import org.bukkit.Bukkit;
+
 public class ActiveRoom {
     private final int X;
     private final int Y;
@@ -20,4 +23,11 @@ public class ActiveRoom {
     public int getRotation() {return rotation;}
     public int getModifiedX(){return room.getModifiedX()*ratio;}
     public int getModifiedY(){return room.getModifiedY()*ratio;}
+    public boolean isAccessible(DirectionEnum direction) {
+        int index = (direction.ordinal() + rotation / 90) % 4;
+        if (index<0){
+            index += 4;
+        }
+        return room.getDirections().get(index);
+    }
 }
