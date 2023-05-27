@@ -109,10 +109,37 @@ public class ActiveDungeon {
     }
     private void createPath() {
         List<int[]> roomList = getDoors(spawnX, spawnY);
-        for(int[] coord : roomList){
-            int X = coord[0];
-            int Y = coord[1];
-            addSizedRoom(X, Y);
+        List<int[]> roomList2 = new ArrayList<>(roomList);
+        int crash = 0;
+        boolean enabled = true;
+        while (enabled && crash <= 30) {
+            for (int[] coord : roomList) {
+                addSizedRoom(coord[0], coord[1]);
+            }
+
+            roomList.clear();
+            for (int[] r : roomList2) {
+                roomList.addAll(getDoors(r[0], r[1]));
+            }
+
+            roomList2.clear();
+            roomList2.addAll(roomList);
+
+            for (int[] coord : roomList) {
+                addSizedRoom(coord[0], coord[1]);
+            }
+
+            enabled = false;
+            for (ActiveRoom[] line : matrix) {
+                for (ActiveRoom casSe : line) {
+                    if (casSe == null) {
+                        enabled = true;
+                        break;
+                    }
+                }
+            }
+
+            crash++;
         }
     }
     private void addSizedRoom(int X, int Y) {
@@ -188,7 +215,6 @@ public class ActiveDungeon {
                 }else if (!box.getRoom().equals(main.getPlaceholderRoom())){
                     if(box.getRoom().getType().equalsIgnoreCase("start")){
                         playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ(), 180-box.getRotation(), 0);
-                        Bukkit.broadcastMessage(box.getRotation()+"");
                     }
                     if(box.getRoom().getSizeX()>1||box.getRoom().getSizeY()>1){
                         Location newLoc = lastLoc.clone();
@@ -263,9 +289,6 @@ public class ActiveDungeon {
     }
     public Floor getFloor() {
         return floor;
-    }
-    public World getWorld(){
-        return world;
     }
     //private void createPath() {
     //        int pathLength = (floor.getSize() * floor.getSize()) / 2;
