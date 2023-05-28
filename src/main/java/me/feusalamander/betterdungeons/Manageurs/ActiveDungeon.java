@@ -75,13 +75,15 @@ public class ActiveDungeon {
         end = null;
         for(Integer id : floor.getRooms()){
             for(Room room : main.getLoadedrooms()){
-                if(room.getId().equalsIgnoreCase(String.valueOf(id))&&room.isActivated()){
-                    if(room.getType().equalsIgnoreCase("start")){
-                        start = room;
-                    }else if(room.getType().equalsIgnoreCase("end")){
-                        end = room;
-                    }else {
-                        rooms.add(room);
+                if(room.getId().equalsIgnoreCase(String.valueOf(id))){
+                    if(room.isActivated()){
+                        if(room.getType().equalsIgnoreCase("start")){
+                            start = room;
+                        }else if(room.getType().equalsIgnoreCase("end")){
+                            end = room;
+                        }else {
+                            rooms.add(room);
+                        }
                     }
                     break;
                 }
@@ -112,23 +114,23 @@ public class ActiveDungeon {
         List<int[]> roomList2 = new ArrayList<>(roomList);
         int crash = 0;
         boolean enabled = true;
-        while (enabled && crash <= 30) {
+        while (enabled && crash <= floor.getSize()* floor.getSize()) {
             for (int[] coord : roomList) {
-                addSizedRoom(coord[0], coord[1]);
+                int X = coord[0];
+                int Y = coord[1];
+                int oldX = coord[2];
+                int oldY = coord[3];
+                if(matrix[X][Y] == null){
+                    addSizedRoom(X, Y, oldX, oldY);
+                }
             }
 
             roomList.clear();
             for (int[] r : roomList2) {
                 roomList.addAll(getDoors(r[0], r[1]));
             }
-
             roomList2.clear();
             roomList2.addAll(roomList);
-
-            for (int[] coord : roomList) {
-                addSizedRoom(coord[0], coord[1]);
-            }
-
             enabled = false;
             for (ActiveRoom[] line : matrix) {
                 for (ActiveRoom casSe : line) {
@@ -142,7 +144,7 @@ public class ActiveDungeon {
             crash++;
         }
     }
-    private void addSizedRoom(int X, int Y) {
+    private void addSizedRoom(int X, int Y, int oldX, int oldY) {
         List<Room> roomList = new ArrayList<>(rooms);
         Room room = null;
         boolean possible = false;
@@ -153,6 +155,12 @@ public class ActiveDungeon {
             room = roomList.get(rand.nextInt(roomList.size()));
             if (room.getSizeX() == 1 && room.getSizeY() == 1) {
                 addActiveRoom(X, Y, room, 0, 1);
+                int crash = 0;
+                while (!getDoors(X, Y).contains(new int[]{oldX, oldY})&&crash < 4){
+                    matrix[X][Y].setRotation(matrix[X][Y].getRotation()+90);
+                    crash++;
+                }
+                
                 return;
             }
             possible = true;
@@ -193,8 +201,8 @@ public class ActiveDungeon {
                     }
                 }
             }
-
             rooms.remove(room);
+
         }
         addActiveRoom(X, Y, room, 0, multiplication);
         for (int i = 0; i < room.getSizeX(); i++) {
@@ -264,22 +272,22 @@ public class ActiveDungeon {
         List<int[]> accessibleCoordinates = new ArrayList<>();
         if (room.isAccessible(DirectionEnum.NORTH)) {
             if(isValidPosition(x, y-1)){
-                accessibleCoordinates.add(new int[]{x, y-1});
+                accessibleCoordinates.add(new int[]{x, y-1, x, y});
             }
         }
         if (room.isAccessible(DirectionEnum.SOUTH)) {
             if(isValidPosition(x, y+1)){
-                accessibleCoordinates.add(new int[]{x, y+1});
+                accessibleCoordinates.add(new int[]{x, y+1, x, y});
             }
         }
         if (room.isAccessible(DirectionEnum.EAST)) {
             if(isValidPosition(x+1, y)){
-                accessibleCoordinates.add(new int[]{x+1, y});
+                accessibleCoordinates.add(new int[]{x+1, y, x, y});
             }
         }
         if (room.isAccessible(DirectionEnum.WEST)) {
             if(isValidPosition(x-1, y)){
-                accessibleCoordinates.add(new int[]{x-1, y});
+                accessibleCoordinates.add(new int[]{x-1, y, x, y});
             }
         }
         return accessibleCoordinates;

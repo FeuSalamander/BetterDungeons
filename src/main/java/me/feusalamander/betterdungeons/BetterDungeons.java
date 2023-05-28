@@ -26,7 +26,7 @@ public final class BetterDungeons extends JavaPlugin {
     public static BetterDungeons main;
     private FloorsConf floorsConf;
     private RoomsConf roomsConf;
-    private World world;
+    private World world = null;
     private Room placeholderRoom;
     private final List<Floor> loadedfloors = new ArrayList<>();
     private final List<Room> loadedrooms = new ArrayList<>();

@@ -11,18 +11,39 @@
   size: 1x1
   activated: true
   type: room
-  doors: [NORTH]
+  doors: [NORTH, SOUTH]
 3:
+  name: left
+  path: "rooms/left.schematic"
+  size: 1x1
+  activated: true
+  type: room
+  doors: [NORTH, EAST]
+4:
+  name: right
+  path: "rooms/right.schematic"
+  size: 1x1
+  activated: true
+  type: room
+  doors: [NORTH, WEST]
+5:
+  name: TPath
+  path: "rooms/T.schematic"
+  size: 1x1
+  activated: true
+  type: room
+  doors: [NORTH, EAST, WEST]
+6:
   name: 2
   path: "rooms/2.schematic"
   size: 1x2
-  activated: true
+  activated: false
   type: room
   doors: [NORTH]
-4:
+7:
   name: 4
   path: "rooms/4.schematic"
   size: 2x2
-  activated: true
+  activated: false
   type: room
   doors: [NORTH]

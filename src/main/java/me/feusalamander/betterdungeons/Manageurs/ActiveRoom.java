@@ -7,7 +7,7 @@ public class ActiveRoom {
     private final int X;
     private final int Y;
     private final Room room;
-    private final int rotation;
+    private int rotation;
     private final int ratio;
     public ActiveRoom(int X, int Y, Room room, int rotation, int ratio){
         this.X = X;
@@ -29,5 +29,8 @@ public class ActiveRoom {
             index += 4;
         }
         return room.getDirections().get(index);
+    }
+    public void setRotation(int rotation) {
+        this.rotation = rotation;
     }
 }
