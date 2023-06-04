@@ -3,27 +3,19 @@ package me.feusalamander.betterdungeons.Manageurs;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
-import com.sk89q.worldedit.extent.clipboard.Clipboard;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
-import com.sk89q.worldedit.function.operation.Operation;
-import com.sk89q.worldedit.function.operation.Operations;
-import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.math.transform.AffineTransform;
-import com.sk89q.worldedit.session.ClipboardHolder;
 import me.feusalamander.betterdungeons.BetterDungeons;
 import me.feusalamander.betterdungeons.DirectionEnum;
+import me.feusalamander.betterdungeons.DungeonBuild;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class ActiveDungeon {
     BetterDungeons main = BetterDungeons.main;
+    private DungeonBuild build = main.getDungeonBuild();
     private double dungeonLoc = 992;
     private Location playerSpawn;
     private final List<Player> players;
@@ -107,7 +99,7 @@ public class ActiveDungeon {
         if(cl){spawnX = rand1*(size-1);spawnY = rand.nextInt(size);if(spawnX == 0){rotation = -90;} else {rotation = 90;}} else{spawnY = rand1*(size-1);if(spawnY == 0) rotation = 180;spawnX = rand.nextInt(size);}
         addActiveRoom(spawnX, spawnY, start, rotation, 1);
         createPath();
-        build();
+        build.build(this);
     }
     private void createPath() {
         List<int[]> roomList = getDoors(spawnX, spawnY);
@@ -156,8 +148,24 @@ public class ActiveDungeon {
             if (room.getSizeX() == 1 && room.getSizeY() == 1) {
                 addActiveRoom(X, Y, room, 0, 1);
                 int crash = 0;
-                while (!getDoors(X, Y).contains(new int[]{oldX, oldY})&&crash < 4){
-                    matrix[X][Y].setRotation(matrix[X][Y].getRotation()+90);
+                while (crash < 4){
+                    Bukkit.broadcastMessage("§cList of "+X+" "+Y+" doit avoir "+oldX+" "+oldY);
+                    for(int[] i : getBackDoors(X, Y)){
+                        Bukkit.broadcastMessage("Doors de "+X+" "+Y+": "+i[0]+" "+i[1]+"  "+i.length);
+                    }
+                    boolean con = true;
+                    for(int[] i : getBackDoors(X, Y)){
+                        if(i[0] == oldX&&i[1] == oldY){
+                            con = false;
+                            break;
+                        }
+                    }
+                    if(!con)break;
+                    if(getBackDoors(X, Y).contains(new int[]{oldX, oldY})){
+                        break;
+                    }else{
+                        matrix[X][Y].setRotation(matrix[X][Y].getRotation()+90);
+                    }
                     crash++;
                 }
                 
@@ -215,57 +223,12 @@ public class ActiveDungeon {
             }
         }
     }
-    private void build(){
-        for(ActiveRoom[] colon : matrix){
-            for(ActiveRoom box : colon){
-                if(box == null){
-                    useSchematic(lastLoc, "rooms/null.schem", 0);
-                }else if (!box.getRoom().equals(main.getPlaceholderRoom())){
-                    if(box.getRoom().getType().equalsIgnoreCase("start")){
-                        playerSpawn = new Location(world, lastLoc.getX(), 53, lastLoc.getZ(), 180-box.getRotation(), 0);
-                    }
-                    if(box.getRoom().getSizeX()>1||box.getRoom().getSizeY()>1){
-                        Location newLoc = lastLoc.clone();
-                        newLoc.add(box.getModifiedX(), 0, box.getModifiedY());
-                        useSchematic(newLoc, box.getRoom().getPath(), box.getRotation());
-                    }else {
-                        useSchematic(lastLoc, box.getRoom().getPath(), box.getRotation());
-                    }
-                }
-                if(lastLoc.getZ() < ((floor.getSize()-1)*32)+dungeonLoc){
-                    lastLoc.set(lastLoc.getX(), 50, lastLoc.getZ()+32);
-                }else{
-                    lastLoc.set(lastLoc.getX()+32, 50, dungeonLoc);
-                }
-            }
-        }
-    }
-    private void useSchematic(Location loc, String path, int rotation){
-        File schematic = new File(main.getDataFolder(), path);
-        if(!schematic.exists())schematic = new File(main.getDataFolder(), "rooms/null.schem");
-        ClipboardFormat format = ClipboardFormats.findByFile(schematic);
-        assert format != null;
-        try (ClipboardReader reader = format.getReader(new FileInputStream(schematic))) {
-            Clipboard clipboard = reader.read();
-            ClipboardHolder clipboardHolder = new ClipboardHolder(clipboard);
-            AffineTransform transform = new AffineTransform().rotateY(rotation);
-            clipboardHolder.setTransform(transform);
-            Operation operation = clipboardHolder.createPaste(editSession)
-                    .to(BlockVector3.at(loc.getX(), loc.getY(), loc.getZ()))
-                    .ignoreAirBlocks(false)
-                    .build();
-            Operations.complete(operation);
-            editCount++;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-    private boolean isValidPosition(int X, int Y) {
-        return X >= 0 && X < floor.getSize() && Y >= 0 && Y < floor.getSize();
-    }
     private void addActiveRoom(int X, int Y, Room room, int rotation, int ratio){
         ActiveRoom activeRoom = new ActiveRoom(X, Y, room, rotation, ratio);
         matrix[X][Y] = activeRoom;
+    }
+    private boolean isValidPosition(int X, int Y) {
+        return X >= 0 && X < floor.getSize() && Y >= 0 && Y < floor.getSize();
     }
     private List<int[]> getDoors(int x,int y){
         ActiveRoom room = matrix[x][y];
@@ -292,11 +255,54 @@ public class ActiveDungeon {
         }
         return accessibleCoordinates;
     }
-    public List<Player> getPlayers() {
-        return players;
+    public List<int[]> getBackDoors(int x, int y){
+        ActiveRoom room = matrix[x][y];
+        List<int[]> accessibleCoordinates = new ArrayList<>();
+        if (room.isAccessible(DirectionEnum.NORTH)) {
+            if(isValidPosition(x, y-1)){
+                accessibleCoordinates.add(new int[]{x, y-1});
+            }
+        }
+        if (room.isAccessible(DirectionEnum.SOUTH)) {
+            if(isValidPosition(x, y+1)){
+                accessibleCoordinates.add(new int[]{x, y+1});
+            }
+        }
+        if (room.isAccessible(DirectionEnum.EAST)) {
+            if(isValidPosition(x+1, y)){
+                accessibleCoordinates.add(new int[]{x+1, y});
+            }
+        }
+        if (room.isAccessible(DirectionEnum.WEST)) {
+            if(isValidPosition(x-1, y)){
+                accessibleCoordinates.add(new int[]{x-1, y});
+            }
+        }
+        return accessibleCoordinates;
     }
     public Floor getFloor() {
         return floor;
+    }
+    public EditSession getEditSession() {
+        return editSession;
+    }
+    public void addEditCount(){
+        editCount++;
+    }
+    public ActiveRoom[][] getMatrix() {
+        return matrix;
+    }
+    public void setPlayerSpawn(Location playerSpawn) {
+        this.playerSpawn = playerSpawn;
+    }
+    public Location getLastLoc() {
+        return lastLoc;
+    }
+    public World getWorld() {
+        return world;
+    }
+    public double getDungeonLoc() {
+        return dungeonLoc;
     }
     //private void createPath() {
     //        int pathLength = (floor.getSize() * floor.getSize()) / 2;
