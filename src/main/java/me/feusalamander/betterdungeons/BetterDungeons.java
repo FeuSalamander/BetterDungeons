@@ -27,7 +27,6 @@ public final class BetterDungeons extends JavaPlugin {
     private FloorsConf floorsConf;
     private RoomsConf roomsConf;
     private World world = null;
-    private Room placeholderRoom;
     private DungeonBuild dungeonBuild;
     private final List<Floor> loadedfloors = new ArrayList<>();
     private final List<Room> loadedrooms = new ArrayList<>();
@@ -76,7 +75,6 @@ public final class BetterDungeons extends JavaPlugin {
             final Room room = new Room(id);
             this.loadedrooms.add(room);
         }
-        placeholderRoom = new Room("-1");
     }
     private void loadGuis(){
         Tools tools = new Tools();
@@ -129,9 +127,6 @@ public final class BetterDungeons extends JavaPlugin {
     }
     public RoomsConf getRoomsConf(){
         return roomsConf;
-    }
-    public Room getPlaceholderRoom() {
-        return placeholderRoom;
     }
     public DungeonBuild getDungeonBuild() {
         return dungeonBuild;

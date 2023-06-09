@@ -45,7 +45,7 @@ public class DungeonBuild {
             for(ActiveRoom box : colon){
                 if(box == null){
                     useSchematic(dungeon, lastLoc, "rooms/null.schem", 0);
-                }else if (!box.getRoom().equals(main.getPlaceholderRoom())){
+                }else if (box.getRoom() != null){
                     if(box.getRoom().getType().equalsIgnoreCase("start")){
                          dungeon.setPlayerSpawn(new Location(dungeon.getWorld(), lastLoc.getX(), 53, lastLoc.getZ(), 180-box.getRotation(), 0));
                     }
