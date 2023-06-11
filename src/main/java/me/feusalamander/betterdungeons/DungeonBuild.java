@@ -1,5 +1,6 @@
 package me.feusalamander.betterdungeons;
 
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
 import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
@@ -11,6 +12,7 @@ import com.sk89q.worldedit.math.transform.AffineTransform;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import me.feusalamander.betterdungeons.Manageurs.ActiveDungeon;
 import me.feusalamander.betterdungeons.Manageurs.ActiveRoom;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
 import java.io.File;
@@ -47,7 +49,7 @@ public class DungeonBuild {
                     useSchematic(dungeon, lastLoc, "rooms/null.schem", 0);
                 }else if (box.getRoom() != null){
                     if(box.getRoom().getType().equalsIgnoreCase("start")){
-                         dungeon.setPlayerSpawn(new Location(dungeon.getWorld(), lastLoc.getX(), 53, lastLoc.getZ(), 180-box.getRotation(), 0));
+                        dungeon.setPlayerSpawn(new Location(dungeon.getWorld(), lastLoc.getX(), 53, lastLoc.getZ(), 180-box.getRotation(), 0));
                     }
                     if(box.getRoom().getSizeX()>1||box.getRoom().getSizeY()>1){
                         Location newLoc = lastLoc.clone();

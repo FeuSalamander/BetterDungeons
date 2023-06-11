@@ -32,6 +32,7 @@ public class ActiveRoom {
         if (index<0){
             index += 4;
         }
+        if(room == null)return false;
         return room.getDirections().get(index);
     }
     public void setRotation(int rotation) {

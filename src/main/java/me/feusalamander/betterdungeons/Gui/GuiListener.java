@@ -3,6 +3,7 @@ package me.feusalamander.betterdungeons.Gui;
 import me.feusalamander.betterdungeons.Manageurs.ActiveDungeon;
 import me.feusalamander.betterdungeons.BetterDungeons;
 import me.feusalamander.betterdungeons.Manageurs.Floor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -59,6 +60,7 @@ public class GuiListener implements Listener {
         for(Floor floor : main.getLoadedfloors()){
             if(name.equalsIgnoreCase(floor.getItemTitle())||name.equalsIgnoreCase(floor.getName())){
                 new ActiveDungeon(List.of(p), floor);
+                break;
             }
         }
     }

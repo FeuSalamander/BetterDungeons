@@ -15,7 +15,7 @@ import java.util.Random;
 
 public class ActiveDungeon {
     BetterDungeons main = BetterDungeons.main;
-    private DungeonBuild build = main.getDungeonBuild();
+    private final DungeonBuild build = main.getDungeonBuild();
     private double dungeonLoc = 992;
     private Location playerSpawn;
     private final List<Player> players;
@@ -119,7 +119,9 @@ public class ActiveDungeon {
 
             roomList.clear();
             for (int[] r : roomList2) {
-                roomList.addAll(getDoors(r[0], r[1], matrix[r[0]][r[1]].getRatio()));
+                ActiveRoom r2 = matrix[r[0]][r[1]];
+                if(r2.getRoom() == null)return;
+                roomList.addAll(getDoors(r[0], r[1], r2.getRatio()));
             }
             roomList2.clear();
             roomList2.addAll(roomList);
@@ -149,10 +151,6 @@ public class ActiveDungeon {
                 addActiveRoom(X, Y, room, 0, 1, null);
                 int crash = 0;
                 while (crash < 4){
-                    Bukkit.broadcastMessage("§cList of "+X+" "+Y+" doit avoir "+oldX+" "+oldY);
-                    for(int[] i : getDoors(X, Y, 1)){
-                        Bukkit.broadcastMessage("Doors de "+X+" "+Y+": "+i[0]+" "+i[1]+"  "+i.length);
-                    }
                     boolean con = true;
                     for(int[] i : getDoors(X, Y, 1)){
                         if(i[0] == oldX&&i[1] == oldY){
@@ -232,6 +230,10 @@ public class ActiveDungeon {
         }
         int crash = 0;
         while (crash < 4){
+            Bukkit.broadcastMessage("§cList of "+X+" "+Y+" doit avoir "+oldX+" "+oldY);
+            for(int[] i : getDoors(X, Y, 1)){
+                Bukkit.broadcastMessage("Doors de "+X+" "+Y+": "+i[0]+" "+i[1]);
+            }
             boolean con = true;
             for(int[] i : getDoors(X, Y, multiplication)){
                 if(i[0] == oldX&&i[1] == oldY){
@@ -261,6 +263,7 @@ public class ActiveDungeon {
         }
         List<int[]> accessibleCoordinates = new ArrayList<>();
         for(ActiveRoom r : rooms){
+            if(r == null)return accessibleCoordinates;
             if (r.isAccessible(DirectionEnum.NORTH)) {
                 if(isValidPosition(x, y-1)){
                     accessibleCoordinates.add(new int[]{x, y-1, x, y});

@@ -15,6 +15,7 @@ public class Room {
     private String name = null;
     private final String id;
     private boolean activated = false;
+    private int[][] schem;
     private int sizex = 0;
     private int sizey = 0;
     private String path = null;
@@ -31,9 +32,7 @@ public class Room {
         name = section.getString("name");
         path = section.getString("path");
         activated = section.getBoolean("activated");
-        String[] split = Objects.requireNonNull(section.getString("size")).split("x");
-        sizex = Integer.parseInt(split[0]);
-        sizey = Integer.parseInt(split[1]);
+        useSchem(section);
         type = section.getString("type");
         directions = new ArrayList<>(4);
         for (int i = 0; i < 4; i++) {directions.add(false);}
@@ -65,6 +64,12 @@ public class Room {
     private void unload(){
         main.getLoadedrooms().remove(this);
     }
+    private void useSchem(ConfigurationSection section){
+        List<int[]> list1 =  new ArrayList<>((List<int[]>)section.getList("size"));
+        sizex = list1.size();
+        sizey = list1.get(0).length;
+        schem = list1.toArray(new int[sizex][sizey]);
+    }
     public boolean isActivated() {
         return activated;
     }
@@ -94,5 +99,8 @@ public class Room {
     }
     public List<Boolean> getDirections() {
         return directions;
+    }
+    public int[][] getSchem(){
+        return schem;
     }
 }
