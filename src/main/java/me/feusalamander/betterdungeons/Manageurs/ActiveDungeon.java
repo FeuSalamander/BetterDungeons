@@ -105,8 +105,7 @@ public class ActiveDungeon {
         List<int[]> roomList = getDoors(spawnX, spawnY, 1, 1);
         List<int[]> roomList2 = new ArrayList<>(roomList);
         int crash = 0;
-        boolean enabled = true;
-        while (enabled && crash <= floor.getSize()* floor.getSize()) {
+        while (crash <= floor.getSize()* floor.getSize()) {
             for (int[] coord : roomList) {
                 int X = coord[0];
                 int Y = coord[1];
@@ -125,16 +124,6 @@ public class ActiveDungeon {
             }
             roomList2.clear();
             roomList2.addAll(roomList);
-            enabled = false;
-            for (ActiveRoom[] line : matrix) {
-                for (ActiveRoom casSe : line) {
-                    if (casSe == null) {
-                        enabled = true;
-                        break;
-                    }
-                }
-            }
-
             crash++;
         }
     }
@@ -197,6 +186,7 @@ public class ActiveDungeon {
                         int newX = X + xm * x;
                         int newY = Y + ym * y;
                         if(matrix[newX][newY] == null) addActiveRoom(newX, newY, room, 0, xm, ym, sm.getId());
+                        //rotate en fonction de xm et ym
                     }
                 }
                 checkDoors(X, Y, xm, ym, oldX, oldY);

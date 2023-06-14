@@ -7,6 +7,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import scala.Int;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,7 +60,11 @@ public class Room {
         main.getLoadedrooms().remove(this);
     }
     private void useSchem(ConfigurationSection section){
-        List<int[]> list1 =  new ArrayList<>((List<int[]>)section.getList("size"));
+        for(Object i : section.getList("size")){
+            main.getLogger().info(i+"");
+        }
+
+        List<int[]> list1 = Arrays.asList(section.getList("size"));
         sizex = list1.size();
         sizey = list1.get(0).length;
         int[][] list2 = list1.toArray(new int[sizex][sizey]);

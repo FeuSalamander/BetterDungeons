@@ -1,7 +1,8 @@
 1:
   name: SpawnRoom
   path: "rooms/spawn.schem"
-  size: {1}
+  size:
+    - [1]
   activated: true
   type: start
   doors:
@@ -9,7 +10,8 @@
 2:
   name: path
   path: "rooms/path.schematic"
-  size: {1}
+  size:
+    - [1]
   activated: true
   type: room
   doors:
@@ -17,7 +19,8 @@
 3:
   name: left
   path: "rooms/left.schematic"
-  size: {1}
+  size:
+    - [1]
   activated: true
   type: room
   doors:
@@ -25,15 +28,17 @@
 4:
   name: right
   path: "rooms/right.schematic"
-  size: {1}
+  size:
+    - [1]
   activated: true
   type: room
   doors:
-   1: [NORTH, WEST]
+    1: [NORTH, WEST]
 5:
   name: TPath
   path: "rooms/T.schematic"
-  size: {1}
+  size:
+    - [1]
   activated: true
   type: room
   doors:
@@ -41,7 +46,8 @@
 6:
   name: 2
   path: "rooms/2.schematic"
-  size: {1, 2}
+  size:
+    - [1, 2]
   activated: false
   type: room
   doors:
@@ -50,7 +56,9 @@
 7:
   name: 4
   path: "rooms/4.schematic"
-  size: {{1, 2}, {3, 4}}
+  size:
+    - [1, 2]
+    - [3, 4]
   activated: true
   type: room
   doors:
