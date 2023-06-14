@@ -97,12 +97,12 @@ public class ActiveDungeon {
         int rand1 = rand.nextInt(2);
         int rotation = 0;
         if(cl){spawnX = rand1*(size-1);spawnY = rand.nextInt(size);if(spawnX == 0){rotation = -90;} else {rotation = 90;}} else{spawnY = rand1*(size-1);if(spawnY == 0) rotation = 180;spawnX = rand.nextInt(size);}
-        addActiveRoom(spawnX, spawnY, start, rotation, 1, null);
+        addActiveRoom(spawnX, spawnY, start, rotation, 1, 1, 1);
         createPath();
         build.build(this);
     }
     private void createPath() {
-        List<int[]> roomList = getDoors(spawnX, spawnY, 1);
+        List<int[]> roomList = getDoors(spawnX, spawnY, 1, 1);
         List<int[]> roomList2 = new ArrayList<>(roomList);
         int crash = 0;
         boolean enabled = true;
@@ -121,7 +121,7 @@ public class ActiveDungeon {
             for (int[] r : roomList2) {
                 ActiveRoom r2 = matrix[r[0]][r[1]];
                 if(r2.getRoom() == null)return;
-                roomList.addAll(getDoors(r[0], r[1], r2.getRatio()));
+                roomList.addAll(getDoors(r[0], r[1], r2.getXm(), r2.getYm()));
             }
             roomList2.clear();
             roomList2.addAll(roomList);
@@ -140,102 +140,85 @@ public class ActiveDungeon {
     }
     private void addSizedRoom(int X, int Y, int oldX, int oldY) {
         List<Room> roomList = new ArrayList<>(rooms);
-        Room room = null;
+        Room room;
         boolean possible = false;
-        int multiplication = 0;
-
         while (!possible) {
-            multiplication = 1;
             room = roomList.get(rand.nextInt(roomList.size()));
             if (room.getSizeX() == 1 && room.getSizeY() == 1) {
-                addActiveRoom(X, Y, room, 0, 1, null);
+                addActiveRoom(X, Y, room, 0, 1, 1, 1);
                 int crash = 0;
-                while (crash < 4){
+                while (crash < 4) {
                     boolean con = true;
-                    for(int[] i : getDoors(X, Y, 1)){
-                        if(i[0] == oldX&&i[1] == oldY){
+                    for (int[] i : getDoors(X, Y, 1, 1)) {
+                        if (i[0] == oldX && i[1] == oldY) {
                             con = false;
                             break;
                         }
                     }
-                    if(!con)break;
-                    matrix[X][Y].setRotation(matrix[X][Y].getRotation()+90);
+                    if (!con)
+                        break;
+                    matrix[X][Y].setRotation(matrix[X][Y].getRotation() + 90);
                     crash++;
                 }
                 return;
             }
-            possible = true;
-
-            for (int i = 0; i < room.getSizeX(); i++) {
-                for (int i2 = 0; i2 < room.getSizeY(); i2++) {
-                    if (!isValidPosition(X + i, Y + i2)) {
-                        possible = false;
-                        break;
-                    }
-                    if (matrix[X + i][Y + i2] != null) {
-                        possible = false;
-                        break;
-                    }
-                }
-                if (!possible) {
-                    break;
-                }
-            }
-            if (!possible) {
-                multiplication = -1;
+            int tries = 1;
+            int[] xmValues = { 1, -1, 1, -1 };
+            int[] ymValues = { 1, 1, -1, -1 };
+            int xm = 1;
+            int ym = 1;
+            while (tries < 5) {
                 possible = true;
-
-                for (int i = 0; i < room.getSizeX(); i++) {
-                    for (int i2 = 0; i2 < room.getSizeY(); i2++) {
-                        if (!isValidPosition(X - i, Y - i2)) {
-                            possible = false;
-                            break;
-                        }
-                        if (matrix[X - i][Y - i2] != null) {
+                xm = xmValues[tries - 1];
+                ym = ymValues[tries - 1];
+                for (int x = 0; x < room.getSizeX(); x++) {
+                    for (int y = 0; y < room.getSizeY(); y++) {
+                        int newX = X + xm * x;
+                        int newY = Y + ym * y;
+                        if (!isValidPosition(newX, newY) || matrix[newX][newY] != null) {
                             possible = false;
                             break;
                         }
                     }
-                    if (!possible) {
+                    if (!possible)
                         break;
+                }
+                if (possible)
+                    tries = 5;
+                tries++;
+            }
+            if (possible) {
+                rooms.remove(room);
+                addActiveRoom(X, Y, room, 0, xm, ym, 1);
+                for (int x = 0; x < room.getSizeX(); x++) {
+                    for (int y = 0; y < room.getSizeY(); y++) {
+                        SmallRoom sm = room.getSchem()[x][y];
+                        if(sm.getId() < 1)return;
+                        int newX = X + xm * x;
+                        int newY = Y + ym * y;
+                        if(matrix[newX][newY] == null) addActiveRoom(newX, newY, room, 0, xm, ym, sm.getId());
                     }
                 }
-            }
-            rooms.remove(room);
-
-        }
-        addActiveRoom(X, Y, room, 0, multiplication, null);
-        ActiveRoom mainRoom = matrix[X][Y];
-        for (int i = 0; i < room.getSizeX(); i++) {
-            for (int i2 = 0; i2 < room.getSizeY(); i2++) {
-                int newX = X + (multiplication * i);
-                int newY = Y + (multiplication * i2);
-                if (matrix[newX][newY] == null) {
-                    List<DirectionEnum> list = new ArrayList<>();
-                    if(room.getDirections().get(0)&&newY == mainRoom.getY()-1){
-                        list.add(DirectionEnum.NORTH);
-                    }
-                    if(room.getDirections().get(1)&&newX == mainRoom.getX()+1){
-                        list.add(DirectionEnum.EAST);
-                    }
-                    if(room.getDirections().get(2)&&newY == mainRoom.getY()+1){
-                        list.add(DirectionEnum.SOUTH);
-                    }
-                    if(room.getDirections().get(3)&&newX == mainRoom.getX()-1){
-                        list.add(DirectionEnum.WEST);
-                    }
-                    addActiveRoom(newX, newY, null, 0, 1, list);
-                }
+                checkDoors(X, Y, xm, ym, oldX, oldY);
             }
         }
+    }
+    private void addActiveRoom(int X, int Y, Room room, int rotation, int xm, int ym, int id){
+        ActiveRoom activeRoom = new ActiveRoom(X, Y, room, rotation, xm, ym, id);
+        matrix[X][Y] = activeRoom;
+    }
+    private boolean isValidPosition(int X, int Y) {
+        return X >= 0 && X < floor.getSize() && Y >= 0 && Y < floor.getSize();
+    }
+    private void checkDoors(int X, int Y, int xm, int ym, int oldX, int oldY){
         int crash = 0;
         while (crash < 4){
             Bukkit.broadcastMessage("§cList of "+X+" "+Y+" doit avoir "+oldX+" "+oldY);
-            for(int[] i : getDoors(X, Y, 1)){
+            for(int[] i : getDoors(X, Y, xm, ym)){
                 Bukkit.broadcastMessage("Doors de "+X+" "+Y+": "+i[0]+" "+i[1]);
             }
             boolean con = true;
-            for(int[] i : getDoors(X, Y, multiplication)){
+            for(int[] i : getDoors(X, Y, xm, ym)){
                 if(i[0] == oldX&&i[1] == oldY){
                     con = false;
                     break;
@@ -243,22 +226,19 @@ public class ActiveDungeon {
             }
             if(!con)break;
             matrix[X][Y].setRotation(matrix[X][Y].getRotation()+90);
+            //rotate les cases dans la matrices
             crash++;
         }
     }
-    private void addActiveRoom(int X, int Y, Room room, int rotation, int ratio, List<DirectionEnum> preDoor){
-        ActiveRoom activeRoom = new ActiveRoom(X, Y, room, rotation, ratio, preDoor);
-        matrix[X][Y] = activeRoom;
-    }
-    private boolean isValidPosition(int X, int Y) {
-        return X >= 0 && X < floor.getSize() && Y >= 0 && Y < floor.getSize();
-    }
-    public List<int[]> getDoors(int x, int y, int ratio){
+    public List<int[]> getDoors(int x, int y, int xm, int ym){
         ActiveRoom room = matrix[x][y];
         List<ActiveRoom> rooms = new ArrayList<>();
         for (int i = 0; i < room.getRoom().getSizeX(); i++) {
             for (int i2 = 0; i2 < room.getRoom().getSizeY(); i2++) {
-                rooms.add(matrix[x+(ratio*i)][y+(ratio*i2)]);
+                ActiveRoom room1 = matrix[x+(xm*i)][y+(ym*i2)];
+                if(room1 != null&&room1.getRoom().equals(room.getRoom())){
+                    rooms.add(matrix[x+(xm*i)][y+(ym*i2)]);
+                }
             }
         }
         List<int[]> accessibleCoordinates = new ArrayList<>();

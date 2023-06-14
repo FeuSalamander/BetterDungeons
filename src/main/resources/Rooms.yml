@@ -4,35 +4,40 @@
   size: {1}
   activated: true
   type: start
-  doors: [NORTH]
+  doors:
+    1: [NORTH]
 2:
   name: path
   path: "rooms/path.schematic"
   size: {1}
   activated: true
   type: room
-  doors: [NORTH, SOUTH]
+  doors:
+    1: [NORTH, SOUTH]
 3:
   name: left
   path: "rooms/left.schematic"
   size: {1}
   activated: true
   type: room
-  doors: [NORTH, EAST]
+  doors:
+    1: [NORTH, EAST]
 4:
   name: right
   path: "rooms/right.schematic"
   size: {1}
   activated: true
   type: room
-  doors: [NORTH, WEST]
+  doors:
+   1: [NORTH, WEST]
 5:
   name: TPath
   path: "rooms/T.schematic"
   size: {1}
   activated: true
   type: room
-  doors: [NORTH, EAST, WEST]
+  doors:
+    1: [NORTH, EAST, WEST]
 6:
   name: 2
   path: "rooms/2.schematic"

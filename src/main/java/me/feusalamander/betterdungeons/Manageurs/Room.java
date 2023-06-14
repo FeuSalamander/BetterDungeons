@@ -15,7 +15,7 @@ public class Room {
     private String name = null;
     private final String id;
     private boolean activated = false;
-    private int[][] schem;
+    private SmallRoom[][] schem;
     private int sizex = 0;
     private int sizey = 0;
     private String path = null;
@@ -23,7 +23,6 @@ public class Room {
     private final BetterDungeons main = BetterDungeons.main;
     private int modifiedX = 0;
     private int modifiedY = 0;
-    private List<Boolean> directions;
     public Room(final String id){
         this.id = id;
         if(id.equalsIgnoreCase("-1"))return;
@@ -34,11 +33,6 @@ public class Room {
         activated = section.getBoolean("activated");
         useSchem(section);
         type = section.getString("type");
-        directions = new ArrayList<>(4);
-        for (int i = 0; i < 4; i++) {directions.add(false);}
-        for(String s : section.getStringList("doors")){
-            directions.set(DirectionEnum.valueOf(s).ordinal(), true);
-        }
         issues();
         modifiedX = (sizex-1)*16;
         modifiedY = (sizey-1)*16;
@@ -68,7 +62,25 @@ public class Room {
         List<int[]> list1 =  new ArrayList<>((List<int[]>)section.getList("size"));
         sizex = list1.size();
         sizey = list1.get(0).length;
-        schem = list1.toArray(new int[sizex][sizey]);
+        int[][] list2 = list1.toArray(new int[sizex][sizey]);
+        schem = new SmallRoom[sizex][sizey];
+        for(int x = 0; x<sizex; x++){
+            for(int y = 0; y<sizex; y++){
+                int id = list2[x][y];
+                if(id == 0){
+                    schem[x][y] = null;
+                    return;
+                }
+                List<Boolean> directions = new ArrayList<>(4);
+                if(section.contains("doors."+id)){
+                    for(String s : section.getStringList("doors."+id)){
+                        directions.set(DirectionEnum.valueOf(s).ordinal(), true);
+                    }
+                }
+                SmallRoom s = new SmallRoom(this, directions, id);
+                schem[x][y] = s;
+            }
+        }
     }
     public boolean isActivated() {
         return activated;
@@ -97,10 +109,17 @@ public class Room {
     public int getModifiedY() {
         return modifiedY;
     }
-    public List<Boolean> getDirections() {
-        return directions;
+    public List<Boolean> getDirections(int id) {
+        for(int x = 0; x<getSizeX(); x++){
+            for(int y = 0; y<getSizeY(); y++){
+                if(schem[x][y].getId() == id){
+                    return schem[x][y].getDirections();
+                }
+            }
+        }
+        return null;
     }
-    public int[][] getSchem(){
+    public SmallRoom[][] getSchem(){
         return schem;
     }
 }
