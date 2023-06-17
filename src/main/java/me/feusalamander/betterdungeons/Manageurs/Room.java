@@ -6,10 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import scala.Int;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @SuppressWarnings("deprecation")
 public class Room {
@@ -32,8 +29,8 @@ public class Room {
         name = section.getString("name");
         path = section.getString("path");
         activated = section.getBoolean("activated");
-        useSchem(section);
         type = section.getString("type");
+        useSchem(section);
         issues();
         modifiedX = (sizex-1)*16;
         modifiedY = (sizey-1)*16;
@@ -60,23 +57,27 @@ public class Room {
         main.getLoadedrooms().remove(this);
     }
     private void useSchem(ConfigurationSection section){
-        for(Object i : section.getList("size")){
-            main.getLogger().info(i+"");
-        }
-
-        List<int[]> list1 = Arrays.asList(section.getList("size"));
+        List<List<Integer>> list1 = (List<List<Integer>>) section.get("size");
+        assert list1 != null;
         sizex = list1.size();
-        sizey = list1.get(0).length;
-        int[][] list2 = list1.toArray(new int[sizex][sizey]);
+        sizey = list1.get(0).size();
+        int[][] matrix = new int[sizex][sizey];
+        for (int i = 0; i < sizex; i++) {
+            List<Integer> row = list1.get(i);
+            for (int j = 0; j < sizey; j++) {
+                matrix[i][j] = row.get(j);
+            }
+        }
         schem = new SmallRoom[sizex][sizey];
         for(int x = 0; x<sizex; x++){
             for(int y = 0; y<sizex; y++){
-                int id = list2[x][y];
+                int id = matrix[x][y];
                 if(id == 0){
                     schem[x][y] = null;
                     return;
                 }
                 List<Boolean> directions = new ArrayList<>(4);
+                for(int i = 0; i<4; i++){directions.add(false);}
                 if(section.contains("doors."+id)){
                     for(String s : section.getStringList("doors."+id)){
                         directions.set(DirectionEnum.valueOf(s).ordinal(), true);
@@ -122,7 +123,7 @@ public class Room {
                 }
             }
         }
-        return null;
+        return Collections.nCopies(4, false);
     }
     public SmallRoom[][] getSchem(){
         return schem;

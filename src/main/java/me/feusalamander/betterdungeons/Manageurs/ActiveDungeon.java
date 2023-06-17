@@ -105,7 +105,7 @@ public class ActiveDungeon {
         List<int[]> roomList = getDoors(spawnX, spawnY, 1, 1);
         List<int[]> roomList2 = new ArrayList<>(roomList);
         int crash = 0;
-        while (crash <= floor.getSize()* floor.getSize()) {
+        while (crash <= floor.getSize()*(floor.getSize()-1)) {
             for (int[] coord : roomList) {
                 int X = coord[0];
                 int Y = coord[1];
@@ -216,8 +216,57 @@ public class ActiveDungeon {
             }
             if(!con)break;
             matrix[X][Y].setRotation(matrix[X][Y].getRotation()+90);
-            //rotate les cases dans la matrices
+            rotate(X, Y);
             crash++;
+        }
+    }
+    private void rotate(int x, int y){
+        ActiveRoom room = matrix[x][y];
+        ActiveRoom[][] subMatrix = new ActiveRoom[room.getRoom().getSizeX()][room.getRoom().getSizeY()];
+        int startRow = x;
+        int startCol = y;
+        int endRow = x+room.getRoom().getSizeX()*room.getXm();
+        int endCol = y+room.getRoom().getSizeY()*room.getYm();
+        if(endRow < startRow){
+            startRow = endRow;
+            endRow = x;
+        }
+        if(endCol < startCol){
+            startCol = endCol;
+            endCol = y;
+        }
+        for (int i = startRow; i <= endRow; i++) {
+            for (int j = startCol; j <= endCol; j++) {
+                subMatrix[i - startRow][j - startCol] = matrix[i][j];
+            }
+        }
+        //transpose
+        int n = subMatrix.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                ActiveRoom temp = subMatrix[i][j];
+                subMatrix[i][j] = subMatrix[j][i];
+                subMatrix[j][i] = temp;
+            }
+        }
+        //reverse rows
+        for (int i = 0; i < n; i++) {
+            int start = 0;
+            int end = n - 1;
+            while (start < end) {
+                ActiveRoom temp = subMatrix[i][start];
+                subMatrix[i][start] = subMatrix[i][end];
+                subMatrix[i][end] = temp;
+                start++;
+                end--;
+            }
+        }
+        //place
+        int subMatrixSize = subMatrix.length;
+        for (int i = 0; i < subMatrixSize; i++) {
+            for (int j = 0; j < subMatrixSize; j++) {
+                matrix[startRow + i][startCol + j] = subMatrix[i][j];
+            }
         }
     }
     public List<int[]> getDoors(int x, int y, int xm, int ym){

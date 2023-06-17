@@ -13,7 +13,7 @@ public class ActiveRoom {
     private final int xm;
     private final int ym;
     private final int id;
-    public ActiveRoom(int X, int Y, Room room, int id, int rotation, int xm, int ym){
+    public ActiveRoom(int X, int Y, Room room, int rotation, int xm, int ym, int id){
         this.X = X;
         this.Y = Y;
         this.room = room;
@@ -29,10 +29,24 @@ public class ActiveRoom {
     public int getModifiedX(){return room.getModifiedX()*xm;}
     public int getModifiedY(){return room.getModifiedY()*ym;}
     public boolean isAccessible(DirectionEnum direction) {
-        int index = (direction.ordinal() + rotation / 90) % 4;
-        if (index<0)index += 4;
-        if(room == null)return false;
-        return room.getDirections(id).get(index);
+        if(room.getSizeX() == 1&&room.getSizeY() == 1){
+            int index = (direction.ordinal() + rotation / 90) % 4;
+            if (index<0)index += 4;
+            return room.getDirections(id).get(index);
+        }else{
+            switch (direction) {
+                case NORTH:
+                    return xm < 0 && room.getDirections(id).get(2);
+                case SOUTH:
+                    return xm < 0 && room.getDirections(id).get(0);
+                case WEST:
+                    return ym < 0 && room.getDirections(id).get(1);
+                case EAST:
+                    return ym < 0 && room.getDirections(id).get(3);
+                default:
+                    return room.getDirections(id).get(direction.ordinal());
+            }
+        }
     }
     public void setRotation(int rotation) {
         this.rotation = rotation;
