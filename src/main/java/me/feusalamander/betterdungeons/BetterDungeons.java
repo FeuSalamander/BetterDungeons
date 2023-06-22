@@ -27,7 +27,7 @@ public final class BetterDungeons extends JavaPlugin {
     private FloorsConf floorsConf;
     private RoomsConf roomsConf;
     private World world = null;
-    private DungeonBuild dungeonBuild;
+    private DungeonBuild build;
     private final List<Floor> loadedfloors = new ArrayList<>();
     private final List<Room> loadedrooms = new ArrayList<>();
     private final List<String> types = new ArrayList<>();
@@ -43,6 +43,7 @@ public final class BetterDungeons extends JavaPlugin {
         floorsConf = new FloorsConf();
         roomsConf = new RoomsConf();
         config = new Config(getConfig());
+        build = new DungeonBuild();
         createWorld();
         loadRooms();
         loadFloors();
@@ -50,7 +51,6 @@ public final class BetterDungeons extends JavaPlugin {
         Objects.requireNonNull(getCommand("BD")).setExecutor(new CmdExecutor());
         getServer().getPluginManager().registerEvents(new GuiListener(), this);
         loadGuis();
-        dungeonBuild = new DungeonBuild();
     }
     @Override
     public void onDisable() {
@@ -128,7 +128,7 @@ public final class BetterDungeons extends JavaPlugin {
     public RoomsConf getRoomsConf(){
         return roomsConf;
     }
-    public DungeonBuild getDungeonBuild() {
-        return dungeonBuild;
+    public DungeonBuild getDungeonBuild(){
+        return build;
     }
 }

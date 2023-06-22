@@ -55,14 +55,14 @@
     2: [NORTH, EAST, SOUTH]
 7:
   name: 4
-  path: "rooms/4.schematic"
+  path: "rooms/4.schem"
   size:
     - [1, 2]
     - [3, 4]
   activated: true
   type: room
   doors:
-    1: [NORTH, WEST]
+    3: [WEST]
+    4: [SOUTH]
+    1: [NORTH]
     2: [NORTH, EAST]
-    3: [SOUTH, WEST]
-    4: [SOUTH, EAST]

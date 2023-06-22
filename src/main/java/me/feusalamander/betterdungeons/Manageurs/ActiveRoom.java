@@ -48,8 +48,9 @@ public class ActiveRoom {
             }
         }
     }
-    public void setRotation(int rotation) {
-        this.rotation = rotation;
+    public void setRotation(ActiveRoom[][] matrix) {
+        this.rotation+=90;
+        matrix[X][Y] = this;
     }
     public int getXm() {
         return xm;

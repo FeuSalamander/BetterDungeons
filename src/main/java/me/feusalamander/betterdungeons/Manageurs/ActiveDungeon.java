@@ -146,7 +146,7 @@ public class ActiveDungeon {
                     }
                     if (!con)
                         break;
-                    matrix[X][Y].setRotation(matrix[X][Y].getRotation() + 90);
+                    matrix[X][Y].setRotation(matrix);
                     crash++;
                 }
                 return;
@@ -185,8 +185,7 @@ public class ActiveDungeon {
                         if(sm.getId() < 1)return;
                         int newX = X + xm * x;
                         int newY = Y + ym * y;
-                        if(matrix[newX][newY] == null) addActiveRoom(newX, newY, room, 0, xm, ym, sm.getId());
-                        //rotate en fonction de xm et ym
+                        if(sm.getId() != -1) addActiveRoom(newX, newY, room, 0, xm, ym, sm.getId());
                     }
                 }
                 checkDoors(X, Y, xm, ym, oldX, oldY);
@@ -204,20 +203,42 @@ public class ActiveDungeon {
         int crash = 0;
         while (crash < 4){
             Bukkit.broadcastMessage("§cList of "+X+" "+Y+" doit avoir "+oldX+" "+oldY);
-            for(int[] i : getDoors(X, Y, xm, ym)){
-                Bukkit.broadcastMessage("Doors de "+X+" "+Y+": "+i[0]+" "+i[1]);
-            }
             boolean con = true;
             for(int[] i : getDoors(X, Y, xm, ym)){
+                Bukkit.broadcastMessage("Doors de "+X+" "+Y+": "+i[0]+" "+i[1]);
                 if(i[0] == oldX&&i[1] == oldY){
                     con = false;
                     break;
                 }
             }
-            if(!con)break;
-            matrix[X][Y].setRotation(matrix[X][Y].getRotation()+90);
-            rotate(X, Y);
-            crash++;
+            if(!con){
+                break;
+            }else{
+                matrix[X][Y].setRotation(matrix);
+                rotate(X, Y);
+                Bukkit.broadcastMessage("§a"+matrix[X][Y].getRotation());
+                crash++;
+
+            }
+        }
+        Bukkit.broadcastMessage("§e"+matrix[X][Y].getRotation()+" "+matrix[X][Y].getXm()+" "+matrix[X][Y].getYm());
+        for (int i = 0; i < matrix[X][Y].getRoom().getSizeX(); i++) {
+            for (int i2 = 0; i2 < matrix[X][Y].getRoom().getSizeY(); i2++) {
+                int newx = X+(xm*i);
+                int newy = Y+(ym*i2);
+                ActiveRoom room1 = matrix[newx][newy];
+                if(room1 != null){
+                    Bukkit.broadcastMessage("§d"+room1.getId()+" "+
+                            room1.isAccessible(DirectionEnum.NORTH)+" "+
+                            room1.isAccessible(DirectionEnum.EAST)+" "+
+                            room1.isAccessible(DirectionEnum.SOUTH)+" "+
+                            room1.isAccessible(DirectionEnum.WEST)+" "+
+                            newx+" "+newy+" "+room1.getRotation());
+                    //probleme de rotation build + isAccessible doit prendre en compte la rotation matricielle
+                    //remarques
+                    // -90 au lieu de 90
+                }
+            }
         }
     }
     private void rotate(int x, int y){
@@ -225,8 +246,8 @@ public class ActiveDungeon {
         ActiveRoom[][] subMatrix = new ActiveRoom[room.getRoom().getSizeX()][room.getRoom().getSizeY()];
         int startRow = x;
         int startCol = y;
-        int endRow = x+room.getRoom().getSizeX()*room.getXm();
-        int endCol = y+room.getRoom().getSizeY()*room.getYm();
+        int endRow = x+(room.getRoom().getSizeX()-1)*room.getXm();
+        int endCol = y+(room.getRoom().getSizeY()-1)*room.getYm();
         if(endRow < startRow){
             startRow = endRow;
             endRow = x;
@@ -272,35 +293,60 @@ public class ActiveDungeon {
     public List<int[]> getDoors(int x, int y, int xm, int ym){
         ActiveRoom room = matrix[x][y];
         List<ActiveRoom> rooms = new ArrayList<>();
-        for (int i = 0; i < room.getRoom().getSizeX(); i++) {
-            for (int i2 = 0; i2 < room.getRoom().getSizeY(); i2++) {
-                ActiveRoom room1 = matrix[x+(xm*i)][y+(ym*i2)];
-                if(room1 != null&&room1.getRoom().equals(room.getRoom())){
-                    rooms.add(matrix[x+(xm*i)][y+(ym*i2)]);
+        if(room.getRoom().getSizeX() == 1&&room.getRoom().getSizeY() == 1){
+            rooms.add(room);
+        }else{
+            int sizeX = room.getRoom().getSizeX();
+            int sizey = room.getRoom().getSizeY();
+            if(room.getId() != 1){
+                for (int i = -1; i < sizeX; i++) {
+                    for (int i2 = -1; i2 < sizey; i2++) {
+                        int newx = x+i;
+                        int newy = y+i2;
+                        if(
+                                isValidPosition(newx, newy)&&
+                                matrix[newx][newy] != null&&
+                                matrix[newx][newy].getRoom().equals(room.getRoom())&&
+                                matrix[newx][newy].getId() == 1){
+                            room = matrix[newx][newy];
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < sizeX; i++) {
+                for (int i2 = 0; i2 < sizey; i2++) {
+                    int newx = x+(xm*i);
+                    int newy = y+(ym*i2);
+                    ActiveRoom room1 = matrix[newx][newy];
+                    if(room1 != null&&room1.getRoom().equals(room.getRoom())){
+                        rooms.add(room1);
+                    }
                 }
             }
         }
         List<int[]> accessibleCoordinates = new ArrayList<>();
         for(ActiveRoom r : rooms){
             if(r == null)return accessibleCoordinates;
+            int x2 = r.getX();
+            int y2 = r.getY();
             if (r.isAccessible(DirectionEnum.NORTH)) {
-                if(isValidPosition(x, y-1)){
-                    accessibleCoordinates.add(new int[]{x, y-1, x, y});
+                if(isValidPosition(x2, y2-1)){
+                    accessibleCoordinates.add(new int[]{x2, y2-1, x, y});
                 }
             }
             if (r.isAccessible(DirectionEnum.SOUTH)) {
-                if(isValidPosition(x, y+1)){
-                    accessibleCoordinates.add(new int[]{x, y+1, x, y});
+                if(isValidPosition(x2, y2+1)){
+                    accessibleCoordinates.add(new int[]{x2, y2+1, x, y});
                 }
             }
             if (r.isAccessible(DirectionEnum.EAST)) {
-                if(isValidPosition(x+1, y)){
-                    accessibleCoordinates.add(new int[]{x+1, y, x, y});
+                if(isValidPosition(x2+1, y2)){
+                    accessibleCoordinates.add(new int[]{x2+1, y2, x, y});
                 }
             }
             if (r.isAccessible(DirectionEnum.WEST)) {
-                if(isValidPosition(x-1, y)){
-                    accessibleCoordinates.add(new int[]{x-1, y, x, y});
+                if(isValidPosition(x2-1, y2)){
+                    accessibleCoordinates.add(new int[]{x2-1, y2, x, y});
                 }
             }
         }
