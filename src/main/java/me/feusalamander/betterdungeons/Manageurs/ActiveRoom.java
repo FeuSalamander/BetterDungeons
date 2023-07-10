@@ -1,13 +1,10 @@
 package me.feusalamander.betterdungeons.Manageurs;
 
 import me.feusalamander.betterdungeons.DirectionEnum;
-import org.bukkit.Bukkit;
-
-import java.util.List;
 
 public class ActiveRoom {
-    private final int X;
-    private final int Y;
+    private int X;
+    private int Y;
     private final Room room;
     private int rotation;
     private final int xm;
@@ -26,8 +23,20 @@ public class ActiveRoom {
     public int getY() {return Y;}
     public Room getRoom() {return room;}
     public int getRotation() {return rotation;}
-    public int getModifiedX(){return room.getModifiedX()*xm;}
-    public int getModifiedY(){return room.getModifiedY()*ym;}
+    public int[] getModified(){
+        int fRotation = (int) Math.toDegrees(Math.atan2(ym, -xm));
+        if (fRotation < 0) {
+            fRotation += 360;
+        }
+        int rRotation = (fRotation +this.rotation)%360;
+        int[] last = new int[2];
+        int angle = rRotation % 360;
+        int signX = (angle == 90 || angle == 180) ? -1 : 1;
+        int signY = (angle == 180 || angle == 270) ? -1 : 1;
+        last[0] = signX * room.getModifiedX();
+        last[1] = signY * room.getModifiedY();
+        return last;
+    }
     public boolean isAccessible(DirectionEnum direction) {
         if(room.getSizeX() == 1&&room.getSizeY() == 1){
             int index = (direction.ordinal() + rotation / 90) % 4;
@@ -48,9 +57,16 @@ public class ActiveRoom {
             }
         }
     }
-    public void setRotation(ActiveRoom[][] matrix) {
+    public void setRotation() {
         this.rotation+=90;
-        matrix[X][Y] = this;
+    }
+    public void setRotationn(ActiveDungeon dungeon) {
+        this.rotation+=90;
+        dungeon.getMatrix()[X][Y] = this;
+    }
+    public void setLoc(int x, int y){
+        this.X = x;
+        this.Y = y;
     }
     public int getXm() {
         return xm;

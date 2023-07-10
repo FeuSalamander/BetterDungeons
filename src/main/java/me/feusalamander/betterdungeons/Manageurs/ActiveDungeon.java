@@ -146,7 +146,7 @@ public class ActiveDungeon {
                     }
                     if (!con)
                         break;
-                    matrix[X][Y].setRotation(matrix);
+                    matrix[X][Y].setRotationn(this);
                     crash++;
                 }
                 return;
@@ -214,7 +214,6 @@ public class ActiveDungeon {
             if(!con){
                 break;
             }else{
-                matrix[X][Y].setRotation(matrix);
                 rotate(X, Y);
                 Bukkit.broadcastMessage("§a"+matrix[X][Y].getRotation());
                 crash++;
@@ -235,8 +234,8 @@ public class ActiveDungeon {
                             room1.isAccessible(DirectionEnum.WEST)+" "+
                             newx+" "+newy+" "+room1.getRotation());
                     //probleme de rotation build + isAccessible doit prendre en compte la rotation matricielle
-                    //remarques
                     // -90 au lieu de 90
+                    //done ? build avec la rotation
                 }
             }
         }
@@ -286,7 +285,12 @@ public class ActiveDungeon {
         int subMatrixSize = subMatrix.length;
         for (int i = 0; i < subMatrixSize; i++) {
             for (int j = 0; j < subMatrixSize; j++) {
-                matrix[startRow + i][startCol + j] = subMatrix[i][j];
+                int newx = startRow + i;
+                int newy = startCol + j;
+                ActiveRoom rooms1 = subMatrix[i][j];
+                rooms1.setLoc(newx, newy);
+                rooms1.setRotation();
+                matrix[newx][newy] = rooms1;
             }
         }
     }
@@ -309,10 +313,13 @@ public class ActiveDungeon {
                                 matrix[newx][newy].getRoom().equals(room.getRoom())&&
                                 matrix[newx][newy].getId() == 1){
                             room = matrix[newx][newy];
+                            x = newx;
+                            y = newy;
                         }
                     }
                 }
             }
+            Bukkit.broadcastMessage("§0"+room.getId());
             for (int i = 0; i < sizeX; i++) {
                 for (int i2 = 0; i2 < sizey; i2++) {
                     int newx = x+(xm*i);

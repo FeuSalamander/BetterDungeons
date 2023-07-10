@@ -45,6 +45,9 @@ public class DungeonBuild {
         Location lastLoc = dungeon.getLastLoc();
         for(ActiveRoom[] colon : matrix){
             for(ActiveRoom box : colon){
+                if(box != null&&box.getRoom().getName().equalsIgnoreCase("4")){
+                    Bukkit.broadcastMessage(box.getId()+"");
+                }
                 if(box == null){
                     useSchematic(dungeon, lastLoc, "rooms/null.schem", 0);
                 }else if (box.getId() == 1){
@@ -53,7 +56,7 @@ public class DungeonBuild {
                     }
                     if(box.getRoom().getSizeX()>1||box.getRoom().getSizeY()>1){
                         Location newLoc = lastLoc.clone();
-                        newLoc.add(box.getModifiedX(), 0, box.getModifiedY());
+                        newLoc.add(box.getModified()[0], 0, box.getModified()[1]);
                         useSchematic(dungeon, newLoc, box.getRoom().getPath(), box.getRotation());
                     }else {
                         useSchematic(dungeon, lastLoc, box.getRoom().getPath(), box.getRotation());
